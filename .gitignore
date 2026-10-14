@@ -1,0 +1,30 @@
+# Secrets — never commit
+.env
+.env.local
+*.key
+
+# Node
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.venv-mac/
+venv/
+
+# Next.js build output
+.next/
+.next-admin/
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db

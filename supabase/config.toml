@@ -1,0 +1,33 @@
+# Supabase project config — Travel Intelligence Engine
+# Docs: https://supabase.com/docs/guides/cli/config
+
+project_id = "travel-intel-engine"
+
+[db]
+# Port for the local Postgres (supabase start).
+port = 54322
+# Postgres major version. 15 = current Supabase default.
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[studio]
+enabled = true
+port = 54323
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+
+# Logflare analytics needs Docker exposed on tcp://localhost:2375 on Windows.
+# Not needed for pipeline/schema work — disable so the stack boots clean.
+[analytics]
+enabled = false

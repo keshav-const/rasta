@@ -1,0 +1,29 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 4321",
+    "admin": "cross-env ADMIN_ENABLED=true NEXT_DISTDIR=.next-admin next dev -p 4322",
+    "build": "next build",
+    "build:admin": "cross-env NEXT_DISTDIR=.next-admin next build",
+    "start": "next start -p 4321",
+    "start:admin": "cross-env ADMIN_ENABLED=true NEXT_DISTDIR=.next-admin next start -p 4322"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.5",
+    "motion": "^12.42.2",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
