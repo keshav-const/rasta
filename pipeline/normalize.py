@@ -20,18 +20,34 @@ _SUBSTITUTIONS = [
     (r"\bkababian\b", "kababian"),
 ]
 
-# Destination name variants -> canonical destination slug (NCR scope).
+# Destination name variants -> canonical destination slug (India-wide).
 DESTINATION_ALIASES = {
-    "delhi": "delhi",
-    "new delhi": "delhi",
-    "central delhi": "delhi",
-    "old delhi": "delhi",
-    "south delhi": "delhi",
-    "north delhi": "delhi",
-    "delhi ncr": "delhi",
-    "ncr": "delhi",
-    "gurgaon": "gurgaon",
-    "gurugram": "gurgaon",
+    # --- NCR ---
+    "delhi": "delhi", "new delhi": "delhi", "central delhi": "delhi", "old delhi": "delhi",
+    "south delhi": "delhi", "north delhi": "delhi", "east delhi": "delhi", "west delhi": "delhi",
+    "delhi ncr": "delhi", "ncr": "delhi",
+    "gurgaon": "gurgaon", "gurugram": "gurgaon",
+    # --- Rajasthan ---
+    "jaipur": "jaipur", "udaipur": "udaipur", "jodhpur": "jodhpur", "jaisalmer": "jaisalmer",
+    "pushkar": "pushkar", "ajmer": "ajmer", "bhilwara": "bhilwara", "bikaner": "bikaner",
+    "mount abu": "mount-abu",
+    # --- North / Hills ---
+    "agra": "agra", "varanasi": "varanasi", "banaras": "varanasi", "kashi": "varanasi",
+    "lucknow": "lucknow", "amritsar": "amritsar", "chandigarh": "chandigarh",
+    "mussoorie": "mussoorie", "mussorie": "mussoorie", "rishikesh": "rishikesh",
+    "haridwar": "haridwar", "dehradun": "dehradun", "nainital": "nainital",
+    "shimla": "shimla", "manali": "manali", "dharamshala": "dharamshala", "mcleodganj": "dharamshala",
+    "srinagar": "srinagar", "leh": "leh", "ladakh": "leh",
+    # --- West ---
+    "mumbai": "mumbai", "bombay": "mumbai", "pune": "pune", "goa": "goa",
+    "ahmedabad": "ahmedabad", "surat": "surat",
+    # --- South ---
+    "bangalore": "bangalore", "bengaluru": "bangalore", "mysore": "mysore", "mysuru": "mysore",
+    "chennai": "chennai", "madras": "chennai", "hyderabad": "hyderabad",
+    "kochi": "kochi", "cochin": "kochi", "munnar": "munnar", "pondicherry": "pondicherry",
+    "puducherry": "pondicherry", "ooty": "ooty",
+    # --- East ---
+    "kolkata": "kolkata", "calcutta": "kolkata", "darjeeling": "darjeeling",
 }
 
 
