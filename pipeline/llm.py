@@ -22,6 +22,24 @@ from . import config
 
 _TRANSIENT_STATUS = {408, 409, 425, 429, 500, 502, 503, 504}
 
+# Optional global pacing between LLM calls (env LLM_MIN_INTERVAL_MS). Keeps rate-limited
+# free tiers (e.g. Gemini ~15 RPM) under their limit when batching. 0 = disabled (default).
+_last_call_ts: float = 0.0
+
+
+def _pace() -> None:
+    global _last_call_ts
+    try:
+        min_interval = float(config.get("LLM_MIN_INTERVAL_MS") or 0) / 1000.0
+    except ValueError:
+        min_interval = 0.0
+    if min_interval <= 0:
+        return
+    wait = _last_call_ts + min_interval - time.monotonic()
+    if wait > 0:
+        time.sleep(wait)
+    _last_call_ts = time.monotonic()
+
 
 class LLMError(RuntimeError):
     """Raised when the LLM call fails or returns unusable output."""
@@ -89,6 +107,7 @@ def chat(
 
     last_err: str = ""
     for attempt in range(1, max_retries + 1):
+        _pace()  # keep calls spaced under the provider's rate limit (if LLM_MIN_INTERVAL_MS set)
         try:
             resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
         except requests.RequestException as e:
