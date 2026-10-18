@@ -79,6 +79,46 @@ def _queue_review(conn, *, source_id, entity, suggested_id, confidence, reason):
     })
 
 
+# Broad/vague "destinations" we never auto-create (too coarse to be useful on their own).
+_DEST_BLOCKLIST = {
+    "india", "bharat", "north india", "south india", "east india", "west india",
+    "central india", "northeast india", "north east india", "northeast", "the himalayas",
+    "himalayas", "western ghats", "incredible india", "n/a", "na", "none", "null",
+    "multiple", "various", "unknown", "nan",
+}
+# Auto-seeded destinations that are states/regions (vs. a city) get type=region.
+_REGION_NAMES = {
+    "kerala", "rajasthan", "gujarat", "karnataka", "tamil nadu", "goa", "sikkim", "meghalaya",
+    "assam", "ladakh", "himachal pradesh", "uttarakhand", "madhya pradesh", "odisha", "punjab",
+    "west bengal", "maharashtra", "uttar pradesh", "arunachal pradesh", "nagaland", "manipur",
+    "mizoram", "tripura", "andhra pradesh", "telangana", "jharkhand", "chhattisgarh", "bihar",
+    "haryana", "jammu and kashmir", "kashmir",
+}
+
+
+def _ensure_destination(conn: psycopg.Connection, raw: str) -> str | None:
+    """Auto-create a destination row for a specific new place, or None for noise/broad regions."""
+    name = (raw or "").strip()
+    low = name.lower()
+    if len(name) < 3 or low in _DEST_BLOCKLIST:
+        return None
+    # Skip compound "X and Y", "X, Y", "X / Y" — not a single place.
+    if any(sep in low for sep in (",", " and ", " & ", "/", ";")):
+        return None
+    slug = canonical_destination(name) or slugify(name)
+    if not slug:
+        return None
+    existing = db.get_destination_id(conn, slug)
+    if existing:
+        return existing
+    typ = "region" if low in _REGION_NAMES else "city"
+    conn.execute(
+        "insert into destinations (name, slug, type) values (%s, %s, %s) on conflict (slug) do nothing",
+        (name.title(), slug, typ),
+    )
+    return db.get_destination_id(conn, slug)
+
+
 def resolve_entity(
     conn: psycopg.Connection, source_id: str, entity: dict[str, Any], source_meta: dict[str, Any]
 ) -> str:
@@ -97,12 +137,15 @@ def resolve_entity(
         return "review:empty"
 
     loc = entity.get("location") or {}
-    dest_slug = canonical_destination(loc.get("destination"))
-    if not dest_slug:
+    raw_dest = (loc.get("destination") or "").strip()
+    dest_slug = canonical_destination(raw_dest)
+    dest_id = db.get_destination_id(conn, dest_slug) if dest_slug else None
+    if dest_id is None:
+        dest_id = _ensure_destination(conn, raw_dest)  # auto-seed a specific new place
+    if dest_id is None:
         _queue_review(conn, source_id=source_id, entity=entity, suggested_id=None,
-                      confidence=None, reason=f"unmapped_destination:{loc.get('destination')}")
+                      confidence=None, reason=f"unmapped_destination:{raw_dest}")
         return "review:destination"
-    dest_id = db.get_destination_id(conn, dest_slug)
 
     area_id = None
     if loc.get("area"):
