@@ -89,7 +89,9 @@ def classify(meta: dict[str, Any]) -> GateResult:
         duration=meta.get("duration_seconds") or 0,
     )
 
-    out = llm.chat_json(_SYSTEM, user, model=config.llm_gate_model(), max_tokens=400)
+    # Gemini flash spends "thinking" tokens before the JSON verdict, so 400 truncates (finish_reason
+    # =length). 2500 leaves room for the thinking budget plus the small verdict.
+    out = llm.chat_json(_SYSTEM, user, model=config.llm_gate_model(), max_tokens=2500)
     result = GateResult(
         is_travel=bool(out.get("is_travel")),
         travel_score=_clamp01(out.get("travel_score")),

@@ -76,27 +76,15 @@ def _extract_json(text: str) -> dict[str, Any]:
     raise LLMError(f"could not parse JSON from response: {t[:200]}")
 
 
-def chat(
-    system: str,
-    user: str,
-    *,
-    model: str | None = None,
-    max_tokens: int = 1024,
-    temperature: float = 0.0,
-    max_retries: int = 3,
-    timeout: int = 60,
+def _request_once(
+    base: str, key: str, model: str, system: str, user: str,
+    max_tokens: int, temperature: float, max_retries: int, timeout: int,
 ) -> str:
-    """Call the chat endpoint, return the raw assistant text.
-
-    Raises LLMError on unrecoverable failure.
-    """
-    url = f"{config.llm_base_url()}/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {config.llm_api_key()}",
-        "Content-Type": "application/json",
-    }
+    """One provider's request loop. Raises LLMError on failure (so chat() can fall back)."""
+    url = f"{base}/chat/completions"
+    headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     payload = {
-        "model": model or config.llm_model(),
+        "model": model,
         "messages": [
             {"role": "system", "content": system},
             {"role": "user", "content": user},
@@ -104,7 +92,6 @@ def chat(
         "temperature": temperature,
         "max_tokens": max_tokens,
     }
-
     last_err: str = ""
     for attempt in range(1, max_retries + 1):
         _pace()  # keep calls spaced under the provider's rate limit (if LLM_MIN_INTERVAL_MS set)
@@ -129,11 +116,50 @@ def chat(
             last_err = f"HTTP {resp.status_code}: {resp.text[:200]}"
             if resp.status_code not in _TRANSIENT_STATUS:
                 raise LLMError(last_err)  # non-transient (bad key, bad model) - fail fast
-
         if attempt < max_retries:
             time.sleep(2 ** attempt)  # 2s, 4s backoff
-
     raise LLMError(f"LLM call failed after {max_retries} attempts - {last_err}")
+
+
+def chat(
+    system: str,
+    user: str,
+    *,
+    model: str | None = None,
+    max_tokens: int = 1024,
+    temperature: float = 0.0,
+    max_retries: int = 3,
+    timeout: int = 60,
+) -> str:
+    """Call the chat endpoint, return the raw assistant text.
+
+    Tries the primary provider, then a fallback (LLM_FALLBACK_* — e.g. Groq, which has a
+    separate daily quota) if the primary is rate-limited/exhausted. The model override only
+    applies to the primary; the fallback uses its own model. Raises LLMError if all fail.
+    """
+    providers: list[tuple[str, str, str]] = [
+        (config.llm_base_url(), config.llm_api_key(), model or config.llm_model()),
+    ]
+    fb_key = config.get("LLM_FALLBACK_API_KEY")
+    if fb_key:
+        providers.append((
+            config.get("LLM_FALLBACK_BASE_URL") or "https://api.groq.com/openai/v1",
+            fb_key,
+            config.get("LLM_FALLBACK_MODEL") or "openai/gpt-oss-120b",
+        ))
+
+    last_err: LLMError | None = None
+    for i, (base, key, mdl) in enumerate(providers):
+        if not key:
+            continue
+        try:
+            return _request_once(base, key, mdl, system, user, max_tokens, temperature, max_retries, timeout)
+        except LLMError as e:
+            last_err = e
+            if i < len(providers) - 1:
+                print(f"[llm] provider {i + 1} failed ({str(e)[:90]}) - falling back")
+            continue
+    raise last_err or LLMError("no LLM provider configured")
 
 
 def chat_json(system: str, user: str, **kwargs: Any) -> dict[str, Any]:

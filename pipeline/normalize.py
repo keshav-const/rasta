@@ -45,9 +45,17 @@ DESTINATION_ALIASES = {
     "bangalore": "bangalore", "bengaluru": "bangalore", "mysore": "mysore", "mysuru": "mysore",
     "chennai": "chennai", "madras": "chennai", "hyderabad": "hyderabad",
     "kochi": "kochi", "cochin": "kochi", "munnar": "munnar", "pondicherry": "pondicherry",
-    "puducherry": "pondicherry", "ooty": "ooty",
+    "puducherry": "pondicherry", "ooty": "ooty", "madurai": "madurai",
     # --- East ---
-    "kolkata": "kolkata", "calcutta": "kolkata", "darjeeling": "darjeeling",
+    "kolkata": "kolkata", "calcutta": "kolkata",
+    "darjeeling": "darjeeling", "west bengal": "darjeeling", "siliguri": "darjeeling",
+    # --- Northeast (region-level hubs; NE travel is region-based) ---
+    "sikkim": "sikkim", "gangtok": "sikkim", "lachung": "sikkim", "lachen": "sikkim",
+    "yumthang": "sikkim", "yumthang valley": "sikkim", "gurudongmar": "sikkim",
+    "gurudongmar lake": "sikkim", "north sikkim": "sikkim", "pelling": "sikkim",
+    "meghalaya": "meghalaya", "shillong": "meghalaya", "cherrapunji": "meghalaya",
+    "sohra": "meghalaya", "dawki": "meghalaya", "mawlynnong": "meghalaya",
+    "assam": "guwahati", "guwahati": "guwahati", "kamakhya": "guwahati",
 }
 
 
