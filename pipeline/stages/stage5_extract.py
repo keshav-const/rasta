@@ -116,7 +116,7 @@ class ExtractionResult:
 
 # Videos longer/denser than this (transcript chars) are chunked up front to
 # avoid output-token truncation on many-entity listicles.
-CHUNK_TRIGGER_CHARS = 13000
+CHUNK_TRIGGER_CHARS = 9000
 CHUNK_WINDOW_SECONDS = 300   # ~5 min per chunk
 CHUNK_OVERLAP_SECONDS = 30   # carry 30s of context between chunks
 
@@ -198,15 +198,48 @@ def _parse_lines(transcript: str) -> list[tuple[int, str]]:
     return out
 
 
+CHUNK_CHARS = 5000  # ~6k tokens with the prompt — under small free-tier per-minute caps
+
+
+def _chunk_by_chars(text: str, size: int = CHUNK_CHARS) -> list[str]:
+    """Split plain (untimestamped) text on paragraph boundaries into ~`size`-char chunks."""
+    paras = [p for p in re.split(r"\n\s*\n", text) if p.strip()]
+    chunks: list[str] = []
+    cur = ""
+    for p in paras:
+        if cur and len(cur) + len(p) + 2 > size:
+            chunks.append(cur)
+            cur = p
+        else:
+            cur = f"{cur}\n\n{p}" if cur else p
+    if cur:
+        chunks.append(cur)
+    # Hard-split any single oversized paragraph.
+    out: list[str] = []
+    for c in chunks:
+        while len(c) > size:
+            out.append(c[:size])
+            c = c[size:]
+        if c:
+            out.append(c)
+    return out or [text]
+
+
 def _chunk_transcript(
     transcript: str,
     window: int = CHUNK_WINDOW_SECONDS,
     overlap: int = CHUNK_OVERLAP_SECONDS,
 ) -> list[str]:
-    """Split a timestamped transcript into ~`window`-second chunks with overlap."""
+    """Split a timestamped transcript into ~`window`-second chunks with overlap.
+
+    Untimestamped text (blogs, Reddit) has no segments, so it falls back to char-based
+    chunking sized to fit small provider limits (e.g. Groq free TPM ~8000).
+    """
     lines = _parse_lines(transcript)
-    if not lines:
-        return [transcript]
+    # A real transcript has many [sec] lines; a blog with a stray "[1]" citation does not —
+    # treat those as plain text so they get char-chunked (not dropped by time-windowing).
+    if len(lines) < 10:
+        return _chunk_by_chars(transcript)
     end = lines[-1][0]
     step = max(window - overlap, 60)
     chunks: list[str] = []
@@ -353,7 +386,9 @@ def extract_auto(*, video_id, title, channel, upload_date, content_type,
             transcript=transcript, max_tokens=max_tokens,
         )
     except llm.LLMError as e:
-        if "truncated" in str(e).lower():
+        msg = str(e).lower()
+        # Truncated output OR a provider request-size/TPM limit (e.g. Groq 413) -> chunk & retry.
+        if any(k in msg for k in ("truncated", "too large", "tokens per minute", " 413", "context length")):
             return extract_chunked(
                 video_id=video_id, title=title, channel=channel, upload_date=upload_date,
                 content_type=content_type, destinations=destinations, language=language,
