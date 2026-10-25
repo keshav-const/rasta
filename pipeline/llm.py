@@ -26,6 +26,10 @@ _TRANSIENT_STATUS = {408, 409, 425, 429, 500, 502, 503, 504}
 # free tiers (e.g. Gemini ~15 RPM) under their limit when batching. 0 = disabled (default).
 _last_call_ts: float = 0.0
 
+# Count HTTP requests sent per provider base (every POST, including retries), so a batch
+# runner can watch how much of a daily free-tier budget it has spent. Printed via env flag.
+_request_counts: dict[str, int] = {}
+
 
 def _pace() -> None:
     global _last_call_ts
@@ -95,6 +99,9 @@ def _request_once(
     last_err: str = ""
     for attempt in range(1, max_retries + 1):
         _pace()  # keep calls spaced under the provider's rate limit (if LLM_MIN_INTERVAL_MS set)
+        _request_counts[base] = _request_counts.get(base, 0) + 1
+        if config.get("LLM_COUNT_REQUESTS"):
+            print(f"[llm] request #{_request_counts[base]} -> {base}")
         try:
             resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
         except requests.RequestException as e:
@@ -116,6 +123,12 @@ def _request_once(
             last_err = f"HTTP {resp.status_code}: {resp.text[:200]}"
             if resp.status_code not in _TRANSIENT_STATUS:
                 raise LLMError(last_err)  # non-transient (bad key, bad model) - fail fast
+            # A *daily* quota 429 (e.g. Gemini free tier RPD) won't reset for hours - retrying
+            # just burns more of the daily budget. Fail fast so chat() falls back immediately.
+            if resp.status_code == 429 and any(
+                m in resp.text for m in ("PerDay", "free_tier_requests", "GenerateRequestsPerDay")
+            ):
+                raise LLMError(f"daily quota exhausted - {last_err}")
         if attempt < max_retries:
             time.sleep(2 ** attempt)  # 2s, 4s backoff
     raise LLMError(f"LLM call failed after {max_retries} attempts - {last_err}")
