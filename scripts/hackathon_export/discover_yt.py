@@ -49,10 +49,11 @@ def search(q: str, n: int = 3) -> list[dict]:
 def main() -> None:
     if not KEY:
         print("YOUTUBE_API_KEY not set", file=sys.stderr); sys.exit(1)
+    queries = sys.argv[1:] or QUERIES  # pass custom search queries as CLI args, else the defaults
     seen_vid: set[str] = set()
     seen_chan: set[str] = set()
     out: list[str] = []
-    for q in QUERIES:
+    for q in queries:
         for it in search(q):
             vid = it.get("id", {}).get("videoId")
             chan = it.get("snippet", {}).get("channelId")
