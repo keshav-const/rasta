@@ -89,29 +89,28 @@ def geocode(name: str, city: str) -> tuple[float, float] | None:
 
 
 def main():
+    # Fetch the work list in a short-lived connection, then CLOSE it — never hold a DB connection
+    # open across the (slow) geocoder network calls, or the Supabase pooler drops it mid-run.
     with db.connect() as c:
-        cur = c.cursor()
-        cur.execute(
+        rows = [dict(r) for r in c.execute(
             """select p.id, p.name, d.slug as city
                from points_of_interest p join destinations d on d.id = p.destination_id
                where p.is_active = true and p.lat is null
                order by p.recommendation_score desc nulls last"""
-        )
-        rows = [dict(r) for r in cur.fetchall()]
-        print(f"[geocode] {len(rows)} POIs need coordinates")
-        ok = 0
-        for i, row in enumerate(rows, 1):
-            res = geocode(row["name"], row["city"])
-            if res:
-                cur.execute(
-                    "update points_of_interest set lat=%s, lng=%s where id=%s",
-                    (res[0], res[1], row["id"]),
-                )
+        ).fetchall()]
+    print(f"[geocode] {len(rows)} POIs need coordinates")
+    ok = 0
+    for i, row in enumerate(rows, 1):
+        res = geocode(row["name"], row["city"])  # no DB connection held here
+        if res:
+            # one short connection per write — cheap and pooler-safe
+            with db.connect() as c:
+                c.execute("update points_of_interest set lat=%s, lng=%s where id=%s", (res[0], res[1], row["id"]))
                 c.commit()
-                ok += 1
-            if i % 20 == 0:
-                print(f"  ...{i}/{len(rows)} done ({ok} located)")
-        print(f"[geocode] DONE: {ok}/{len(rows)} located")
+            ok += 1
+        if i % 20 == 0:
+            print(f"  ...{i}/{len(rows)} done ({ok} located)")
+    print(f"[geocode] DONE: {ok}/{len(rows)} located")
 
 
 if __name__ == "__main__":
