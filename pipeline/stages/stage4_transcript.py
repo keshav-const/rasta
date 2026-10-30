@@ -17,6 +17,23 @@ from youtube_transcript_api import (
     VideoUnavailable,
     CouldNotRetrieveTranscript,
 )
+from youtube_transcript_api.proxies import GenericProxyConfig, WebshareProxyConfig
+
+from pipeline import config
+
+
+def _proxy_config():
+    """Build a proxy_config from env so transcript fetches survive YouTube IP blocks.
+    Prefers Webshare residential (rotating IPs); else a generic HTTP/HTTPS proxy; else None."""
+    ws_user = config.get("WEBSHARE_PROXY_USERNAME")
+    ws_pass = config.get("WEBSHARE_PROXY_PASSWORD")
+    if ws_user and ws_pass:
+        return WebshareProxyConfig(proxy_username=ws_user, proxy_password=ws_pass)
+    http = config.get("TRANSCRIPT_PROXY_HTTP") or config.get("TRANSCRIPT_PROXY_URL")
+    https = config.get("TRANSCRIPT_PROXY_HTTPS") or config.get("TRANSCRIPT_PROXY_URL")
+    if http or https:
+        return GenericProxyConfig(http_url=http, https_url=https)
+    return None
 
 # Language preference for NCR content: English first (auto-captions common),
 # then Hindi. default_language (from metadata) is prepended at runtime.
@@ -68,7 +85,7 @@ def _pick_transcript(tlist, langs: list[str]):
 
 def fetch_transcript(video_id: str, default_language: str | None = None) -> TranscriptResult:
     """Retrieve the best available transcript. Raises TranscriptError if none."""
-    api = YouTubeTranscriptApi()
+    api = YouTubeTranscriptApi(proxy_config=_proxy_config())
     try:
         tlist = api.list(video_id)
     except (TranscriptsDisabled, NoTranscriptFound, VideoUnavailable) as e:
