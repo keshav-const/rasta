@@ -47,9 +47,11 @@ def is_blocked() -> bool:
 
 def blocked_sources(limit: int) -> list[dict]:
     with db.connect() as c:
+        # NB: this query is parameterized (limit %s), so the literal % in the
+        # ILIKE pattern must be doubled (%%) or psycopg reads %I as a placeholder.
         return [dict(r) for r in c.execute(
             """select id, url, video_id from sources
-               where status = 'failed' and failure_reason ilike '%IpBlocked%'
+               where status = 'failed' and failure_reason ilike '%%IpBlocked%%'
                order by updated_at asc
                limit %s""",
             (limit,),
