@@ -8,7 +8,12 @@ Spec: pipeline-spec.md > STAGE 4.
 """
 from __future__ import annotations
 
+import os
+import random
+import tempfile
+import time
 from dataclasses import dataclass
+from pathlib import Path
 
 from youtube_transcript_api import (
     YouTubeTranscriptApi,
@@ -20,6 +25,42 @@ from youtube_transcript_api import (
 from youtube_transcript_api.proxies import GenericProxyConfig, WebshareProxyConfig
 
 from pipeline import config
+
+
+# --- Global pacing -----------------------------------------------------------
+# YouTube rate-limits the timedtext endpoint per IP: bulk-pulling a few hundred
+# transcripts in a short window trips an IpBlocked for hours. We self-throttle to
+# a minimum interval BETWEEN fetches, enforced across separate `run.py` processes
+# via a shared timestamp file, so batches stay under the radar. Tune with env
+# TRANSCRIPT_MIN_INTERVAL_SEC (0 disables). A small random jitter avoids a
+# perfectly periodic request signature.
+_PACE_FILE = Path(tempfile.gettempdir()) / "rasta_yt_transcript_last.ts"
+
+
+def _min_interval() -> float:
+    try:
+        return max(0.0, float(os.getenv("TRANSCRIPT_MIN_INTERVAL_SEC", "6")))
+    except ValueError:
+        return 6.0
+
+
+def _throttle_before_fetch() -> None:
+    """Block until at least _min_interval() seconds have passed since the last
+    fetch recorded in the shared timestamp file. Best-effort across processes."""
+    interval = _min_interval()
+    if interval <= 0:
+        return
+    try:
+        last = float(_PACE_FILE.read_text().strip()) if _PACE_FILE.exists() else 0.0
+    except (ValueError, OSError):
+        last = 0.0
+    wait = last + interval - time.time()
+    if wait > 0:
+        time.sleep(wait + random.uniform(0, interval * 0.3))  # jitter
+    try:
+        _PACE_FILE.write_text(str(time.time()))
+    except OSError:
+        pass
 
 
 def _proxy_config():
@@ -85,6 +126,7 @@ def _pick_transcript(tlist, langs: list[str]):
 
 def fetch_transcript(video_id: str, default_language: str | None = None) -> TranscriptResult:
     """Retrieve the best available transcript. Raises TranscriptError if none."""
+    _throttle_before_fetch()
     api = YouTubeTranscriptApi(proxy_config=_proxy_config())
     try:
         tlist = api.list(video_id)
