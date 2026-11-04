@@ -24,7 +24,15 @@ FUZZY_REVIEW = 0.70     # >= queue with suggestion; below = treat as no match
 NEW_MIN_CONF = 0.70     # extraction_confidence >= to auto-create a new POI
 
 _VALID_STANCES = {"recommended", "mentioned", "warned_against", "mixed"}
+# Entity types we resolve into graph rows. Beyond physical places ("poi") and
+# activities, we also keep CULTURAL entities (art forms, crafts, festivals,
+# cuisines) — these anchor to a region/destination rather than a lat/lng, but
+# otherwise match, dedupe and carry sourced claims exactly like a POI.
 _POI_TYPES = {"poi", "activity"}
+# "cultural" is a generic catch-all the extractor LLM often emits (e.g. for a
+# tribe/community or an unlabeled tradition) — accept it alongside the specific types.
+_CULTURAL_TYPES = {"art_form", "performing_art", "craft", "festival", "cuisine", "dish", "cultural"}
+_RESOLVABLE_TYPES = _POI_TYPES | _CULTURAL_TYPES
 
 
 def _clean_stance(s: Any) -> str:
@@ -124,7 +132,7 @@ def resolve_entity(
 ) -> str:
     """Resolve a single extracted entity. Returns the outcome label."""
     entity_type = str(entity.get("entity_type") or "poi").lower()
-    if entity_type not in _POI_TYPES:
+    if entity_type not in _RESOLVABLE_TYPES:
         _queue_review(conn, source_id=source_id, entity=entity, suggested_id=None,
                       confidence=None, reason=f"out_of_scope_type:{entity_type}")
         return "review:type"

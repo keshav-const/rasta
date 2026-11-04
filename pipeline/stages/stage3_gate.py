@@ -21,16 +21,22 @@ LONG_DURATION = 3600      # > 3600s -> flag for chunking
 _SYSTEM = "You are a fast travel-content classifier. Respond with valid JSON only, no prose."
 
 _PROMPT = """Analyze this YouTube video metadata and determine if it contains \
-extractable travel, food, or local experience information.
+extractable travel, food, or local-CULTURE information.
 
-Score by ENTITY EXTRACTABILITY, not by whether it is a formal "travel guide":
-- A video reviewing/recommending specific named places - restaurants, cafes,
-  street food spots, markets, attractions, monuments, hotels, bars - IS travel/
-  local content and should score HIGH (0.7-1.0). Each named place is an
-  extractable entity. Food reviews and "best places in <city>" count fully.
-- Score LOW (<0.3) ONLY when there are no extractable named places, e.g.
-  recipe-only cooking, product unboxing, news, generic talking-head with no
-  locations.
+Score by ENTITY EXTRACTABILITY, not by whether it is a formal "travel guide".
+TWO kinds of entity are extractable and both score HIGH (0.7-1.0):
+- PLACES: a video reviewing/recommending specific named places - restaurants,
+  cafes, street food spots, markets, attractions, monuments, hotels, bars.
+  Food reviews and "best places in <city>" count fully.
+- CULTURE anchored to a region: an art form, dance, craft, folk/traditional
+  festival, or regional cuisine tied to a PLACE or REGION - e.g. Chhau dance of
+  Purulia, Theyyam of Kannur, Madhubani painting of Mithila, Bihu of Assam,
+  Rann Utsav of Kutch. The tradition itself is the extractable entity; its
+  region is the anchor. These are exactly the content we WANT.
+
+Score LOW (<0.3) ONLY when nothing is extractable, e.g. a step-by-step recipe or
+craft TUTORIAL with no cultural/geographic anchor, product unboxing, news, or a
+generic talking-head with neither places nor a place-bound tradition.
 
 Title: {title}
 Description: {description}
@@ -42,9 +48,9 @@ Respond in JSON only:
 {{
   "is_travel": true/false,
   "travel_score": 0.0-1.0,
-  "content_type": "food_guide|travel_vlog|city_guide|hotel_review|attraction_review|listicle|other",
+  "content_type": "food_guide|travel_vlog|city_guide|hotel_review|attraction_review|listicle|art_culture|festival|craft|cuisine|other",
   "estimated_entities": <number>,
-  "primary_destinations": ["city/area names detected"],
+  "primary_destinations": ["city/region names detected"],
   "reasoning": "one line"
 }}"""
 

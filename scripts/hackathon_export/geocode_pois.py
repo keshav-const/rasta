@@ -93,9 +93,13 @@ def main():
     # open across the (slow) geocoder network calls, or the Supabase pooler drops it mid-run.
     with db.connect() as c:
         rows = [dict(r) for r in c.execute(
+            # Only physical places get a pin. Cultural entities (art forms, festivals,
+            # crafts, cuisines) anchor to their region's destination, which is itself
+            # geocoded — a point for "Chhau dance" or "Gonds" would be meaningless.
             """select p.id, p.name, d.slug as city
                from points_of_interest p join destinations d on d.id = p.destination_id
                where p.is_active = true and p.lat is null
+                 and p.entity_type in ('poi', 'activity')
                order by p.recommendation_score desc nulls last"""
         ).fetchall()]
     print(f"[geocode] {len(rows)} POIs need coordinates")

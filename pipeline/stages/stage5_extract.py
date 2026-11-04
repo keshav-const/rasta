@@ -32,8 +32,15 @@ _USER = """CONTEXT:
 - Transcript Language: {language}
 
 CRITICAL RULES:
-1. Extract EVERY distinct place, restaurant, cafe, attraction, hotel, or notable
-   location mentioned by name.
+1. Extract EVERY distinct entity mentioned by name. Two kinds count:
+   (a) PLACES — restaurant, cafe, attraction, hotel, market, temple, viewpoint,
+       or any notable physical location.
+   (b) CULTURAL entities tied to a region — an art form, dance, craft, folk or
+       traditional festival, or regional cuisine (e.g. "Chhau dance", "Theyyam",
+       "Madhubani painting", "Bihu", "Rann Utsav"). For these, the tradition is
+       the entity and its region is the anchor: put the most specific region in
+       location.destination (a city like Kannur/Purulia, else the state like
+       Assam/Kerala — never "India" or "North India").
 2. For each entity capture the creator's STANCE: recommended | mentioned |
    warned_against | mixed. "skip this" / "overrated" = warned_against.
 3. Every factual claim (hours, prices, specialities, tips) MUST include the exact
@@ -52,15 +59,24 @@ CRITICAL RULES:
 CONFIDENCE: 0.9-1.0 named+recommended+details; 0.7-0.89 named+opinion; 0.5-0.69
 named but thin; 0.3-0.49 possibly garbled/brief; below 0.3 do not include.
 
-ENTITY TYPES: poi (physical place) | activity (something you DO) | destination
-(city/large area) | area (neighborhood).
-POI CATEGORIES: restaurant, cafe, bar, street_food, bakery, sweet_shop, attraction,
-monument, market, hotel, hostel, shop, park, temple, mosque, gurudwara, museum,
-viewpoint, mall, coworking, salon, other.
+ENTITY TYPES:
+- Physical/experiential: poi (physical place) | activity (something you DO) |
+  destination (city/large area) | area (neighborhood).
+- Cultural (anchored to a region, no exact address needed): art_form (e.g.
+  Pattachitra/Madhubani/Warli painting) | performing_art (dance/music/theatre
+  e.g. Chhau, Theyyam, Kathakali) | craft (handloom/pottery/handicraft e.g.
+  Channapatna toys, Kutch Bandhani) | festival (folk/traditional e.g. Bihu,
+  Bastar Dussehra, Rann Utsav) | cuisine | dish.
+POI CATEGORIES (only for poi/activity): restaurant, cafe, bar, street_food, bakery,
+sweet_shop, attraction, monument, market, hotel, hostel, shop, park, temple, mosque,
+gurudwara, museum, viewpoint, mall, coworking, salon, other. For CULTURAL types set
+poi_category to null.
 CLAIM FIELDS: speciality, must_try_item, price_level, average_cost, opening_hours,
 closing_hours, best_time, worst_time, crowd_level, waiting_time, parking,
 accessibility, tip, warning, seasonal_note, dress_code, reservation_needed,
-payment_modes, contact, website.
+payment_modes, contact, website. For CULTURAL entities also use: origin_region,
+materials_or_instruments, unesco_or_gi_status, when_held (festival season/month),
+where_to_experience (village/venue/temple), cultural_significance.
 
 Respond with ONLY valid JSON matching this schema:
 {{
