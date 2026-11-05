@@ -26,11 +26,16 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import socket
 import sys
 import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
+
+# Hard floor on every network read so a slow/stalled MediaWiki response can never
+# hang the batch indefinitely (explicit per-call timeouts don't always fire).
+socket.setdefaulttimeout(45)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
