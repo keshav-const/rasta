@@ -1,9 +1,37 @@
 # Travel Intelligence Engine — Project Context & Handoff
 
 **Working name:** Rasta
-**Scope:** Delhi + Gurgaon (NCR) MVP
-**Last updated:** 2026-07-21
-**Purpose of this file:** Full context so work can resume on a new device (or a fresh Claude session) without re-deriving anything. The architectural source-of-truth is [`pipeline-spec.md`](./pipeline-spec.md); this file records what has actually been *built* and what's next.
+**Scope:** India-wide, multi-source **cultural** travel graph (grew out of a Delhi/Gurgaon MVP)
+**Last updated:** 2026-11-06
+**Purpose of this file:** Full context so work can resume on a new device (or a fresh Claude session) without re-deriving anything. The architectural source-of-truth is [`pipeline-spec.md`](./pipeline-spec.md); the public overview is [`README.md`](./README.md); this file records what has actually been *built* and what's next.
+
+> ⚠️ **Parts of §3–§12 below are from the original NCR/Windows MVP and are stale** (e.g. `C:\ts` paths, Python 3.14, Agnes AI LLM). Current reality: macOS at `/Users/admin/Downloads/ts`, venv `.venv-mac` (Python 3.9), extraction via `gpt-4o-mini` (OpenAI). The **Update log** and **§2** below reflect the current state; treat them as authoritative where they conflict with older sections.
+
+---
+
+## Update log — 2026-11 (India-wide cultural graph)
+
+The project expanded from an NCR, YouTube-only, places-only MVP into an **India-wide,
+multi-source cultural graph**.
+
+**New: it's a cultural graph, not places-only.** `points_of_interest.entity_type` now
+admits cultural entities — `art_form`, `performing_art`, `craft`, `festival`, `cuisine`,
+`dish`, `cultural` — each anchored to its region's destination (no lat/lng; attaches to a
+geocoded destination). Gate (stage3) + extractor (stage5) + resolver (stage6) all updated;
+widened via migration `20261104130000_cultural_entity_types.sql`.
+
+**New sources** (all over the shared `pipeline/ingest.py → ingest_text_source` backbone):
+- `scripts/ingest_wikipedia.py` — Wikipedia/Wikivoyage by title / `--category` / `--search`.
+- `scripts/ingest_blog.py` — blogs/articles.
+- `scripts/ingest_podcast.py` — podcasts, transcribed **locally** with faster-whisper (no paid API).
+- `scripts/enrich_tourist_stats.py` — official data.gov.in state tourist-visit stats → `destinations.stats` (migration `20261105090000_destination_stats.sql`).
+
+**Reliability + speed:**
+- Transcript self-pacing (`TRANSCRIPT_MIN_INTERVAL_SEC` in stage4) + `scripts/auto_retry_blocked.sh` / `scripts/retry_blocked.py` to recover IP-blocked YouTube videos hands-off.
+- **Scoring:** rewritten to one connection + bulk fetch/update — ~37 min → ~42 s (≈50×).
+- **Geocoding:** `scripts/hackathon_export/geocode_pois.py` now runs a concurrent **multi-provider pool** (Photon · Nominatim · LocationIQ · Geoapify), marks permanent failures so they're never re-tried, and fast-fails — coverage 86% → ~97%. Keyless works; `LOCATIONIQ_API_KEY` / `GEOAPIFY_API_KEY` add speed.
+
+**LLM:** extraction is `gpt-4o-mini` (OpenAI, no daily cap) for batches; the gate/extractor stay provider-agnostic.
 
 ---
 
@@ -31,10 +59,15 @@ Framing note: it is a **travel-graph aggregator**, not "creator recommendations.
 | Web — public site | ✅ built (design-polished) |
 | Web — admin console | ✅ built + **password-gated auth** (see §12) |
 
-**Data as of 2026-07-29:** 12 sources — 10 resolved, 2 failed. 117 canonical POIs, 121 evidence records, 23 review-queue items (15 pending). Numbers are live — query the DB for exact.
+**Data as of 2026-11-06 (India-wide):** ~4,000 active entities (~800 of them cultural),
+~470 destinations, ~97% of physical places geocoded, across **4 source platforms**
+(Wikipedia ~291 · YouTube ~263 · blogs ~169 · podcasts) + 24 states enriched with official
+tourist-visit stats. Numbers are live — query the DB for exact.
 
-- **2026-07-29 batch:** added 6 Delhi/Gurgaon food videos. 5 extracted+resolved (Old Delhi/Food Ranger, Sarojini/CP/Kamla-Nagar attempts by Delhi Food Walks, Gurgaon/Veggie Wander 28 entities, Hauz Khas/DLRV). Graph grew 66→117 POIs.
-- **2 failed sources:** the original captions-disabled video, and `OgWEsKVIC6g` (Kamla Nagar) which **fails Stage 5 JSON parsing on both normal and `--force` runs** — a persistent malformed-extraction bug worth investigating in `llm.py` tolerant-parse / chunk-merge (the Gurgaon video hit the same error once but passed on retry, so it's partly non-deterministic).
+- Sources are ingested in batches (Wikipedia by theme/category, blog listicles, YouTube
+  discovery, podcasts) then consolidated with `resolve.py → score.py → geocode_pois.py`.
+- **Known data note:** some older evidence rows have malformed `claims` (occasionally a
+  string instead of a dict); `stage8_score` now skips these defensively.
 
 ---
 
@@ -222,10 +255,23 @@ Dev default password currently set locally: `rasta-admin-2026` — **change befo
 
 ## 9. What's next (roadmap)
 
-**Immediate / high-value**
-1. **Stage 7 — Enrichment (Google Places).** ✅ *Code built* (`stage7_enrich.py` + `scripts/enrich.py`, Places API New v1 `searchText`). **Still needs `GOOGLE_PLACES_API_KEY`** to actually run — the runner no-ops without it. Once the key is set: `python scripts/enrich.py` fills lat/lng-less google_* columns (rating, hours, phone, website, photos, business status) + logs price_level conflicts to `verification_data`. Never overwrites AI claims. ~$17/1k lookups; ~$1–2 for current POIs. **NB:** searchText does not populate lat/lng into a column yet — location comes back in the API response but there are no `lat`/`lng` columns on the POI table (only in spec). Add columns if map display is needed.
-2. **Real POI photos** on cards / POI hero (from Places `google_photos` refs at Stage 7 — needs a Places photo-media fetch/proxy — or an Unsplash key). Currently procedural category tiles. Web display does not yet read the `google_*` columns.
-3. **Process more videos** to grow the graph and make the frequency signal meaningful. (Batch of 6 Delhi/Gurgaon food videos added 2026-07-29 — see §2.)
+**THE next milestone — Rasta API (Go).** The data/graph is mature and multi-source;
+the product value now is exposing it. Build a scalable, monetised **Go REST API** over
+the graph (separate repo `rasta-api`): `chi` + `pgx`/`sqlc` + `go-redis`, OpenAPI via
+`swaggo`, deployed on Render. Endpoints `/v1/places`, `/v1/entities?type=festival`,
+`/v1/cities`, cursor pagination; self-serve developer signup (Supabase Auth) + API keys +
+usage; plan-aware rate limiting + Razorpay paywall (Free/Pro/Enterprise). Schema groundwork
+(api_keys, subscriptions, api_usage, destinations.country) already applied.
+
+**Data sources — effectively complete.** Covered: YouTube, Wikipedia/Wikivoyage, blogs,
+podcasts (local whisper) + open-gov tourist stats. Remaining candidates are low-value:
+forums/Reddit (`ingest_reddit.py` exists but shelved — app-rejected), other UGC. Not worth
+more effort before the API.
+
+**Deferred / optional**
+1. **Stage 7 — Enrichment (Google Places).** Code built (`stage7_enrich.py` + `scripts/enrich.py`), dormant — needs `GOOGLE_PLACES_API_KEY`. The real fix for per-POI prices/opening-hours/ratings (data.gov.in has no such dataset). Deferred by owner (cost).
+2. **Real POI photos** on cards / POI hero (Places `google_photos`, or Unsplash). Currently procedural tiles.
+3. **Resolve cache** — cache `list_pois_for_destination` per run to cut redundant per-entity fetches in stage6 (smaller win than the score/geocode fixes already shipped).
 
 **Before any deploy**
 4. **Admin authentication.** ✅ *Done* — signed-cookie password gate (§12). Still single shared credential; upgrade to Supabase Auth if multiple admins / audit trail needed.
