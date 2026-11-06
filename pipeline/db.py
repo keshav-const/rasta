@@ -419,20 +419,44 @@ def get_evidence_for_poi(conn: psycopg.Connection, entity_id: str) -> list[dict[
     ).fetchall()
 
 
+_SCORING_UPDATE_SQL = """
+    update points_of_interest set
+        recommendation_score = %(recommendation_score)s,
+        specialities = %(specialities)s,
+        tips = %(tips)s,
+        warnings = %(warnings)s,
+        best_time = %(best_time)s,
+        price_level = %(price_level)s,
+        average_cost_inr = %(average_cost_inr)s,
+        crowd_info = %(crowd_info)s,
+        updated_at = now()
+    where id = %(id)s
+"""
+
+
 def update_poi_scoring(conn: psycopg.Connection, entity_id: str, fields: dict[str, Any]) -> None:
-    conn.execute(
-        """
-        update points_of_interest set
-            recommendation_score = %(recommendation_score)s,
-            specialities = %(specialities)s,
-            tips = %(tips)s,
-            warnings = %(warnings)s,
-            best_time = %(best_time)s,
-            price_level = %(price_level)s,
-            average_cost_inr = %(average_cost_inr)s,
-            crowd_info = %(crowd_info)s,
-            updated_at = now()
-        where id = %(id)s
-        """,
-        {**fields, "id": entity_id},
-    )
+    conn.execute(_SCORING_UPDATE_SQL, {**fields, "id": entity_id})
+
+
+def all_evidence_by_entity(conn: psycopg.Connection) -> dict[str, list[dict[str, Any]]]:
+    """All evidence rows for all POIs in ONE query, grouped by entity_id.
+
+    Replaces a per-POI SELECT (thousands of round-trips) with a single scan — the
+    scoring pass is pure computation, so one connection is fine here."""
+    rows = conn.execute(
+        "select entity_id, stance, recommendation_strength, extraction_confidence, "
+        "claims, source_views_at_extraction, source_upload_date from entity_evidence"
+    ).fetchall()
+    out: dict[str, list[dict[str, Any]]] = {}
+    for r in rows:
+        out.setdefault(r["entity_id"], []).append(r)
+    return out
+
+
+def bulk_update_poi_scoring(conn: psycopg.Connection, updates: list[dict[str, Any]]) -> None:
+    """Apply many scoring updates over one connection (psycopg pipelines executemany),
+    instead of a connect-per-POI. Each dict is one row's fields plus 'id'."""
+    if not updates:
+        return
+    with conn.cursor() as cur:
+        cur.executemany(_SCORING_UPDATE_SQL, updates)

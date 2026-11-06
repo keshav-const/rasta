@@ -115,7 +115,12 @@ def score_poi(evidence: list[dict[str, Any]], today: date | None = None) -> Scor
     fields_seen: set[str] = set()
 
     for e in evidence:
-        for c in e.get("claims") or []:
+        claims = e.get("claims") or []
+        if not isinstance(claims, list):
+            continue  # malformed (occasionally a JSON string slips through)
+        for c in claims:
+            if not isinstance(c, dict):
+                continue  # skip non-dict claim entries
             f = str(c.get("field") or "").lower()
             val = str(c.get("value") or "").strip()
             if not val:

@@ -22,18 +22,23 @@ from pipeline.stages import stage8_score      # noqa: E402
 
 
 def main() -> int:
+    # One connection for the whole pass: fetch every POI + all evidence in two
+    # queries, score in memory, then write back in one batched update. Scoring makes
+    # no network/LLM calls, so holding a single connection is safe and ~100x faster
+    # than the old connect-per-POI loop (thousands of round-trips).
     with db.connect() as conn:
         pois = db.list_pois(conn)
-    if not pois:
-        print("No POIs to score.")
-        return 0
-
-    print(f"Scoring {len(pois)} POIs...")
-    for p in pois:
-        with db.connect() as conn:
-            ev = db.get_evidence_for_poi(conn, p["id"])
-            scored = stage8_score.score_poi(ev)
-            db.update_poi_scoring(conn, p["id"], scored.as_fields())
+        if not pois:
+            print("No POIs to score.")
+            return 0
+        print(f"Scoring {len(pois)} POIs...")
+        ev_by_poi = db.all_evidence_by_entity(conn)
+        updates = []
+        for p in pois:
+            scored = stage8_score.score_poi(ev_by_poi.get(p["id"], []))
+            updates.append({**scored.as_fields(), "id": p["id"]})
+        db.bulk_update_poi_scoring(conn, updates)
+        print(f"Updated {len(updates)} POIs.")
 
     # leaderboard
     with db.connect() as conn:
