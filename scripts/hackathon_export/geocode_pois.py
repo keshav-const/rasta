@@ -9,11 +9,15 @@ global match never lands. Writes lat/lng back into points_of_interest. Idempoten
 from __future__ import annotations
 
 import re
+import socket
 import sys
 import time
 import urllib.parse
 import urllib.request
 import json as _json
+
+# Hard floor so a stalled geocoder read fails fast instead of hanging ~20s.
+socket.setdefaulttimeout(10)
 
 sys.path.insert(0, "/Users/admin/Downloads/ts")
 from pipeline import db  # noqa: E402
@@ -73,19 +77,17 @@ def geocode(name: str, city: str) -> tuple[float, float] | None:
     queries = [f"{name}, {city}, India"]
     if clean.lower() != name.lower():
         queries.append(f"{clean}, {city}, India")   # retry without alias/suffix
-    queries.append(f"{clean}, India")
-    # Photon first (better + bulk-safe), Nominatim fallback.
+    # Photon first (better + bulk-safe), Nominatim as a single fallback. We keep the
+    # query set tight so a FAILING place (the common case among what's left) costs
+    # little, since those get marked and never retried.
     for q in queries:
         hit = _photon(q)
-        time.sleep(0.7)  # be polite to the shared Photon instance
+        time.sleep(0.5)  # be polite to the shared Photon instance
         if hit:
             return hit
-    for q in queries[:2]:
-        hit = _nominatim(q)
-        time.sleep(1.1)
-        if hit:
-            return hit
-    return None
+    hit = _nominatim(queries[0])
+    time.sleep(0.8)
+    return hit
 
 
 def main():
@@ -96,25 +98,35 @@ def main():
             # Only physical places get a pin. Cultural entities (art forms, festivals,
             # crafts, cuisines) anchor to their region's destination, which is itself
             # geocoded — a point for "Chhau dance" or "Gonds" would be meaningless.
+            # Only physical places get a pin, and skip ones we've already tried and
+            # failed (attributes.geo_tried) — those are obscure/ambiguous names that
+            # fail every run and otherwise waste ~7-25s each, every consolidation.
             """select p.id, p.name, d.slug as city
                from points_of_interest p join destinations d on d.id = p.destination_id
                where p.is_active = true and p.lat is null
                  and p.entity_type in ('poi', 'activity')
+                 and (p.attributes ->> 'geo_tried') is null
                order by p.recommendation_score desc nulls last"""
         ).fetchall()]
     print(f"[geocode] {len(rows)} POIs need coordinates")
     ok = 0
     for i, row in enumerate(rows, 1):
         res = geocode(row["name"], row["city"])  # no DB connection held here
-        if res:
-            # one short connection per write — cheap and pooler-safe
-            with db.connect() as c:
-                c.execute("update points_of_interest set lat=%s, lng=%s where id=%s", (res[0], res[1], row["id"]))
-                c.commit()
-            ok += 1
+        with db.connect() as c:  # one short connection per result — pooler-safe
+            if res:
+                c.execute("update points_of_interest set lat=%s, lng=%s where id=%s",
+                          (res[0], res[1], row["id"]))
+                ok += 1
+            else:
+                # Mark as attempted so future runs don't re-try this failing name.
+                c.execute(
+                    "update points_of_interest set attributes = "
+                    "coalesce(attributes,'{}'::jsonb) || jsonb_build_object('geo_tried', now()::text) "
+                    "where id=%s", (row["id"],))
+            c.commit()
         if i % 20 == 0:
             print(f"  ...{i}/{len(rows)} done ({ok} located)")
-    print(f"[geocode] DONE: {ok}/{len(rows)} located")
+    print(f"[geocode] DONE: {ok}/{len(rows)} located, {len(rows)-ok} marked tried")
 
 
 if __name__ == "__main__":
