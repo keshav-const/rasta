@@ -1,32 +1,47 @@
 #!/usr/bin/env python3
-"""Free, keyless geocoding pass for POIs missing coordinates.
+"""Concurrent, multi-provider geocoding pass for POIs missing coordinates.
 
-Primary geocoder = Photon (photon.komoot.io, OSM-based, no key, bulk-friendly) — far better
-hit rate than Nominatim for Indian landmarks AND it doesn't hard-throttle bulk runs. Nominatim
-is kept as a fallback. Results are sanity-checked against the India bounding box so a stray
-global match never lands. Writes lat/lng back into points_of_interest. Idempotent: lat IS NULL only.
+Free geocoders each cap throughput (Nominatim 1 req/s, Photon "be polite"), so you
+can't parallelise ONE service without getting IP-banned. Instead we run SEVERAL
+providers CONCURRENTLY — one worker thread each, every worker throttled to its own
+provider's limit — so combined throughput ≈ the sum of all providers' rates.
+
+Providers (a provider is used only if enabled / its key is set):
+  - Photon      (keyless)           photon.komoot.io
+  - Nominatim   (keyless)           nominatim.openstreetmap.org
+  - LocationIQ  (LOCATIONIQ_API_KEY)  5k/day, ~2 req/s — good India coverage
+  - Geoapify    (GEOAPIFY_API_KEY)    3k/day, fast
+
+Work is distributed across providers; misses from round 1 are retried on a DIFFERENT
+provider in round 2; whatever still fails is marked (attributes.geo_tried) so it's
+never retried on later runs. Results sanity-checked against the India bounding box.
+
+Usage:
+  python scripts/hackathon_export/geocode_pois.py                 # new places only
+  python scripts/hackathon_export/geocode_pois.py --retry-failed  # also re-try
+                                                                   # previously-marked
+                                                                   # failures (do this
+                                                                   # once after adding keys)
 """
 from __future__ import annotations
 
+import argparse
+import json as _json
 import re
 import socket
 import sys
+import threading
 import time
 import urllib.parse
 import urllib.request
-import json as _json
 
-# Hard floor so a stalled geocoder read fails fast instead of hanging ~20s.
-socket.setdefaulttimeout(10)
+socket.setdefaulttimeout(10)  # fast-fail on a stalled read
 
 sys.path.insert(0, "/Users/admin/Downloads/ts")
-from pipeline import db  # noqa: E402
+from pipeline import config, db  # noqa: E402
 
-UA = {"User-Agent": "TasteTrail/1.0 (hackathon POI geocoder; contact keshav)"}
-PHOTON = "https://photon.komoot.io/api/"
-NOMINATIM = "https://nominatim.openstreetmap.org/search"
-# India bounding box (incl. Ladakh to ~37.5N, Andamans dropped to avoid false far-east hits).
-IN_BBOX = (6.0, 68.0, 37.6, 97.5)  # (lat_min, lon_min, lat_max, lon_max)
+UA = {"User-Agent": "RastaGeocoder/1.0 (github.com/keshav-const/rasta)"}
+IN_BBOX = (6.0, 68.0, 37.6, 97.5)  # lat_min, lon_min, lat_max, lon_max
 
 
 def _in_india(lat: float, lon: float) -> bool:
@@ -35,99 +50,170 @@ def _in_india(lat: float, lon: float) -> bool:
 
 
 def _clean(name: str) -> str:
-    """Strip things that confuse geocoders: parentheticals, and '&'/'and'/',' tails.
-    'Red Fort (Lal Qila)' -> 'Red Fort'; 'India Gate & Kartavya Path' -> 'India Gate'."""
-    n = re.sub(r"\([^)]*\)", "", name)          # drop (...) aliases
-    n = re.split(r"\s+&\s+|\s+and\s+|,\s*", n)[0]  # take first entity
+    n = re.sub(r"\([^)]*\)", "", name)
+    n = re.split(r"\s+&\s+|\s+and\s+|,\s*", n)[0]
     return n.strip(" -–—") or name
 
 
-def _photon(q: str) -> tuple[float, float] | None:
-    u = PHOTON + "?" + urllib.parse.urlencode({"q": q, "limit": 1, "lang": "en"})
+def _get(url: str) -> dict | list | None:
     try:
-        with urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=20) as r:
-            d = _json.load(r)
-    except Exception as e:
-        print(f"  [photon err] {q[:40]}: {type(e).__name__}")
+        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=10) as r:
+            return _json.load(r)
+    except Exception:
         return None
-    feats = d.get("features") or []
+
+
+# --- providers: each takes a query string, returns (lat, lon) in India or None ---
+def _photon(q: str, key: str = "") -> tuple[float, float] | None:
+    d = _get("https://photon.komoot.io/api/?" + urllib.parse.urlencode({"q": q, "limit": 1, "lang": "en"}))
+    feats = (d or {}).get("features") if isinstance(d, dict) else None
     if feats:
-        lon, lat = feats[0]["geometry"]["coordinates"]  # GeoJSON = [lon, lat]
+        lon, lat = feats[0]["geometry"]["coordinates"]
         if _in_india(lat, lon):
             return float(lat), float(lon)
     return None
 
 
-def _nominatim(q: str) -> tuple[float, float] | None:
-    params = urllib.parse.urlencode({"q": q, "format": "json", "limit": 1, "countrycodes": "in"})
-    try:
-        with urllib.request.urlopen(urllib.request.Request(f"{NOMINATIM}?{params}", headers=UA), timeout=20) as r:
-            data = _json.load(r)
-    except Exception:
-        return None
-    if data:
-        lat, lon = float(data[0]["lat"]), float(data[0]["lon"])
+def _nominatim(q: str, key: str = "") -> tuple[float, float] | None:
+    d = _get("https://nominatim.openstreetmap.org/search?" +
+             urllib.parse.urlencode({"q": q, "format": "json", "limit": 1, "countrycodes": "in"}))
+    if isinstance(d, list) and d:
+        lat, lon = float(d[0]["lat"]), float(d[0]["lon"])
         if _in_india(lat, lon):
             return lat, lon
     return None
 
 
-def geocode(name: str, city: str) -> tuple[float, float] | None:
-    clean = _clean(name)
-    queries = [f"{name}, {city}, India"]
-    if clean.lower() != name.lower():
-        queries.append(f"{clean}, {city}, India")   # retry without alias/suffix
-    # Photon first (better + bulk-safe), Nominatim as a single fallback. We keep the
-    # query set tight so a FAILING place (the common case among what's left) costs
-    # little, since those get marked and never retried.
-    for q in queries:
-        hit = _photon(q)
-        time.sleep(0.5)  # be polite to the shared Photon instance
-        if hit:
-            return hit
-    hit = _nominatim(queries[0])
-    time.sleep(0.8)
-    return hit
+def _locationiq(q: str, key: str) -> tuple[float, float] | None:
+    d = _get("https://us1.locationiq.com/v1/search?" +
+             urllib.parse.urlencode({"key": key, "q": q, "format": "json", "limit": 1, "countrycodes": "in"}))
+    if isinstance(d, list) and d:
+        lat, lon = float(d[0]["lat"]), float(d[0]["lon"])
+        if _in_india(lat, lon):
+            return lat, lon
+    return None
 
 
-def main():
-    # Fetch the work list in a short-lived connection, then CLOSE it — never hold a DB connection
-    # open across the (slow) geocoder network calls, or the Supabase pooler drops it mid-run.
+def _geoapify(q: str, key: str) -> tuple[float, float] | None:
+    d = _get("https://api.geoapify.com/v1/geocode/search?" +
+             urllib.parse.urlencode({"text": q, "apiKey": key, "limit": 1, "filter": "countrycode:in"}))
+    feats = (d or {}).get("features") if isinstance(d, dict) else None
+    if feats:
+        lon, lat = feats[0]["geometry"]["coordinates"]
+        if _in_india(lat, lon):
+            return float(lat), float(lon)
+    return None
+
+
+class Provider:
+    def __init__(self, name, fn, interval, key=""):
+        self.name, self.fn, self.interval, self.key = name, fn, interval, key
+
+    def locate(self, name: str, city: str) -> tuple[float, float] | None:
+        clean = _clean(name)
+        queries = [f"{name}, {city}, India"]
+        if clean.lower() != name.lower():
+            queries.append(f"{clean}, {city}, India")
+        for q in queries:
+            hit = self.fn(q, self.key)
+            time.sleep(self.interval)  # stay under this provider's own limit
+            if hit:
+                return hit
+        return None
+
+
+def build_providers() -> list[Provider]:
+    provs = [Provider("photon", _photon, 0.6), Provider("nominatim", _nominatim, 1.1)]
+    liq = config.get("LOCATIONIQ_API_KEY")
+    if liq:
+        provs.append(Provider("locationiq", _locationiq, 0.6, liq))
+    geo = config.get("GEOAPIFY_API_KEY")
+    if geo:
+        provs.append(Provider("geoapify", _geoapify, 0.3, geo))
+    return provs
+
+
+def _write_hit(poi_id, lat, lng):
     with db.connect() as c:
-        rows = [dict(r) for r in c.execute(
-            # Only physical places get a pin. Cultural entities (art forms, festivals,
-            # crafts, cuisines) anchor to their region's destination, which is itself
-            # geocoded — a point for "Chhau dance" or "Gonds" would be meaningless.
-            # Only physical places get a pin, and skip ones we've already tried and
-            # failed (attributes.geo_tried) — those are obscure/ambiguous names that
-            # fail every run and otherwise waste ~7-25s each, every consolidation.
-            """select p.id, p.name, d.slug as city
-               from points_of_interest p join destinations d on d.id = p.destination_id
-               where p.is_active = true and p.lat is null
-                 and p.entity_type in ('poi', 'activity')
-                 and (p.attributes ->> 'geo_tried') is null
-               order by p.recommendation_score desc nulls last"""
-        ).fetchall()]
-    print(f"[geocode] {len(rows)} POIs need coordinates")
-    ok = 0
-    for i, row in enumerate(rows, 1):
-        res = geocode(row["name"], row["city"])  # no DB connection held here
-        with db.connect() as c:  # one short connection per result — pooler-safe
-            if res:
-                c.execute("update points_of_interest set lat=%s, lng=%s where id=%s",
-                          (res[0], res[1], row["id"]))
-                ok += 1
+        c.execute("update points_of_interest set lat=%s, lng=%s where id=%s", (lat, lng, poi_id))
+        c.commit()
+
+
+def _mark_tried(poi_id):
+    with db.connect() as c:
+        c.execute("update points_of_interest set attributes = "
+                  "coalesce(attributes,'{}'::jsonb) || jsonb_build_object('geo_tried', now()::text) "
+                  "where id=%s", (poi_id,))
+        c.commit()
+
+
+def run_round(providers: list[Provider], pois: list[dict]) -> list[dict]:
+    """Distribute pois across providers, run one thread per provider in parallel.
+    Returns the misses. Each worker writes its own hits."""
+    buckets: list[list[dict]] = [[] for _ in providers]
+    for i, p in enumerate(pois):
+        buckets[i % len(providers)].append(p)
+    misses: list[dict] = []
+    lock = threading.Lock()
+
+    def worker(prov: Provider, slice_: list[dict]):
+        for poi in slice_:
+            hit = prov.locate(poi["name"], poi["city"])
+            if hit:
+                _write_hit(poi["id"], hit[0], hit[1])
             else:
-                # Mark as attempted so future runs don't re-try this failing name.
-                c.execute(
-                    "update points_of_interest set attributes = "
-                    "coalesce(attributes,'{}'::jsonb) || jsonb_build_object('geo_tried', now()::text) "
-                    "where id=%s", (row["id"],))
-            c.commit()
-        if i % 20 == 0:
-            print(f"  ...{i}/{len(rows)} done ({ok} located)")
-    print(f"[geocode] DONE: {ok}/{len(rows)} located, {len(rows)-ok} marked tried")
+                with lock:
+                    misses.append(poi)
+
+    threads = [threading.Thread(target=worker, args=(pr, bk)) for pr, bk in zip(providers, buckets)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    return misses
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--retry-failed", action="store_true",
+                    help="also re-attempt places previously marked geo_tried")
+    args = ap.parse_args()
+
+    providers = build_providers()
+    print(f"[geocode] providers: {', '.join(p.name for p in providers)}")
+
+    where_tried = "" if args.retry_failed else "and (p.attributes ->> 'geo_tried') is null"
+    with db.connect() as c:
+        pois = [dict(r) for r in c.execute(
+            f"""select p.id, p.name, d.slug as city
+                from points_of_interest p join destinations d on d.id = p.destination_id
+                where p.is_active = true and p.lat is null
+                  and p.entity_type in ('poi', 'activity') {where_tried}
+                order by p.recommendation_score desc nulls last"""
+        ).fetchall()]
+    print(f"[geocode] {len(pois)} POIs need coordinates")
+    if not pois:
+        return 0
+
+    t0 = time.time()
+    misses = run_round(providers, pois)
+    print(f"[geocode] round 1: {len(pois) - len(misses)}/{len(pois)} located")
+
+    # Round 2: retry misses, rotated so each lands on a DIFFERENT provider.
+    if misses and len(providers) > 1:
+        rotated = providers[1:] + providers[:1]
+        still = run_round(rotated, misses)
+        print(f"[geocode] round 2: {len(misses) - len(still)}/{len(misses)} more located")
+        misses = still
+
+    for poi in misses:
+        _mark_tried(poi["id"])
+
+    located = len(pois) - len(misses)
+    print(f"[geocode] DONE: {located}/{len(pois)} located, {len(misses)} marked tried "
+          f"in {time.time()-t0:.0f}s")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
