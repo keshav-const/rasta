@@ -31,7 +31,7 @@ _VALID_STANCES = {"recommended", "mentioned", "warned_against", "mixed"}
 _POI_TYPES = {"poi", "activity"}
 # "cultural" is a generic catch-all the extractor LLM often emits (e.g. for a
 # tribe/community or an unlabeled tradition) — accept it alongside the specific types.
-_CULTURAL_TYPES = {"art_form", "performing_art", "craft", "festival", "cuisine", "dish", "cultural"}
+_CULTURAL_TYPES = {"art_form", "performing_art", "craft", "festival", "cuisine", "dish", "sport", "cultural"}
 _RESOLVABLE_TYPES = _POI_TYPES | _CULTURAL_TYPES
 
 

@@ -66,7 +66,9 @@ ENTITY TYPES:
   Pattachitra/Madhubani/Warli painting) | performing_art (dance/music/theatre
   e.g. Chhau, Theyyam, Kathakali) | craft (handloom/pottery/handicraft e.g.
   Channapatna toys, Kutch Bandhani) | festival (folk/traditional e.g. Bihu,
-  Bastar Dussehra, Rann Utsav) | cuisine | dish.
+  Bastar Dussehra, Rann Utsav) | cuisine | dish | sport (traditional/folk sport,
+  martial art, game or racing event e.g. Kabaddi, Kalaripayattu, Mallakhamba,
+  Jallikattu, Vallam Kali boat race).
 POI CATEGORIES (only for poi/activity): restaurant, cafe, bar, street_food, bakery,
 sweet_shop, attraction, monument, market, hotel, hostel, shop, park, temple, mosque,
 gurudwara, museum, viewpoint, mall, coworking, salon, other. For CULTURAL types set

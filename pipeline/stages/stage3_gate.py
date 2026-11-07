@@ -29,10 +29,11 @@ TWO kinds of entity are extractable and both score HIGH (0.7-1.0):
   cafes, street food spots, markets, attractions, monuments, hotels, bars.
   Food reviews and "best places in <city>" count fully.
 - CULTURE anchored to a region: an art form, dance, craft, folk/traditional
-  festival, or regional cuisine tied to a PLACE or REGION - e.g. Chhau dance of
-  Purulia, Theyyam of Kannur, Madhubani painting of Mithila, Bihu of Assam,
-  Rann Utsav of Kutch. The tradition itself is the extractable entity; its
-  region is the anchor. These are exactly the content we WANT.
+  festival, regional cuisine, or traditional sport/martial art/game tied to a
+  PLACE or REGION - e.g. Chhau dance of Purulia, Theyyam of Kannur, Madhubani
+  painting of Mithila, Bihu of Assam, Rann Utsav of Kutch, Kalaripayattu of
+  Kerala, Jallikattu of Tamil Nadu. The tradition itself is the extractable
+  entity; its region is the anchor. These are exactly the content we WANT.
 
 Score LOW (<0.3) ONLY when nothing is extractable, e.g. a step-by-step recipe or
 craft TUTORIAL with no cultural/geographic anchor, product unboxing, news, or a
@@ -48,7 +49,7 @@ Respond in JSON only:
 {{
   "is_travel": true/false,
   "travel_score": 0.0-1.0,
-  "content_type": "food_guide|travel_vlog|city_guide|hotel_review|attraction_review|listicle|art_culture|festival|craft|cuisine|other",
+  "content_type": "food_guide|travel_vlog|city_guide|hotel_review|attraction_review|listicle|art_culture|festival|craft|cuisine|sport|other",
   "estimated_entities": <number>,
   "primary_destinations": ["city/region names detected"],
   "reasoning": "one line"
