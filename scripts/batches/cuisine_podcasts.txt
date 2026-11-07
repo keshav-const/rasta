@@ -1,0 +1,15 @@
+# Podcast batch — Indian food/culture shows, transcribed LOCALLY with
+# faster-whisper (no API cost). One RSS feed URL per line; the ingester pulls the
+# latest PODCAST_LIMIT episodes (default 2) from each.
+# Run:  PODCAST_LIMIT=2 bash scripts/run_batch.sh podcast scripts/batches/cuisine_podcasts.txt
+#
+# NOTE: each episode is a full audio transcription on CPU — slow. Keep PODCAST_LIMIT
+# small and run this one in the background, separate from the text batches.
+
+# Cook Like An Aunty — history + cultural significance of Indian dishes (Buzzsprout RSS, verified).
+https://feeds.buzzsprout.com/2202743.rss
+
+# --- add more once you have their RSS feed URLs (resolve from Apple/Spotify page) ---
+# Beyond Butter Chicken (regional Indian cooking) — find RSS
+# Naan Curry with Sadaf and Archit (IVM) — find RSS
+# Discovering India: The Food Safari — find RSS

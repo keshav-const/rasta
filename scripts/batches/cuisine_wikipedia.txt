@@ -1,0 +1,67 @@
+# Cuisine batch — Indian regional cuisines + iconic dishes (Wikipedia titles).
+# Adds culinary breadth/depth: each entity anchors to its region's destination.
+# Lines starting with # or blank are ignored. Run:
+#   bash scripts/run_batch.sh wikipedia scripts/batches/cuisine_wikipedia.txt
+
+# --- regional cuisines ---
+Rajasthani cuisine
+Punjabi cuisine
+Bengali cuisine
+Gujarati cuisine
+Maharashtrian cuisine
+Goan cuisine
+Kashmiri cuisine
+Hyderabadi cuisine
+Chettinad cuisine
+Kerala cuisine
+Tamil cuisine
+Andhra cuisine
+Udupi cuisine
+Awadhi cuisine
+Mughlai cuisine
+Bihari cuisine
+Odia cuisine
+Assamese cuisine
+Naga cuisine
+Manipuri cuisine
+Sikkimese cuisine
+Konkani cuisine
+Mangalorean cuisine
+Malvani cuisine
+Kathiyawadi cuisine
+Parsi cuisine
+Kodava cuisine
+Mappila cuisine
+
+# --- iconic regional dishes ---
+Rogan josh
+Hyderabadi biryani
+Dhokla
+Litti chokha
+Misal pav
+Vada pav
+Pani puri
+Masala dosa
+Idli
+Pongal (dish)
+Bisi Bele Bath
+Chole bhature
+Sarson da saag
+Pav bhaji
+Puran poli
+Modak
+Rasgulla
+Sandesh (confectionery)
+Mishti doi
+Dhansak
+Sol kadhi
+Thukpa
+Momo (food)
+Appam
+Sadya
+Dal baati churma
+Ghevar
+Galouti kebab
+Tunday Kababi
+Shami kebab
+Haleem

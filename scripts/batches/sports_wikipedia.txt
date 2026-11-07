@@ -1,0 +1,45 @@
+# Local sports batch — Indian traditional / folk sports, martial arts, games, and
+# the signature events + places that anchor them (Wikipedia titles).
+# Adds "local sports destinations" breadth: each anchors to its region/place.
+# Run:  bash scripts/run_batch.sh wikipedia scripts/batches/sports_wikipedia.txt
+
+# --- traditional sports & games ---
+Kabaddi
+Kho kho
+Mallakhamba
+Gilli-danda
+Lagori
+Kancha (game)
+Pachisi
+Chaupar
+Carrom
+Atya patya
+Langdi
+Insuknawr
+Dhopkhel
+
+# --- martial arts ---
+Kalaripayattu
+Silambam
+Gatka
+Thang-Ta
+Mardani khel
+Pehlwani
+Inbuan wrestling
+Mukna (sport)
+
+# --- animal / water / seasonal sports & their events ---
+Jallikattu
+Kambala
+Vallam Kali
+Nehru Trophy Boat Race
+Hiyang Tannaba
+Sagol Kangjei
+Kite fighting
+International Kite Festival, Gujarat
+
+# --- destinations / festivals that host local sport & games ---
+Pushkar Fair
+Hornbill Festival
+Jaisalmer Desert Festival
+Rann Utsav

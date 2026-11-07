@@ -1,0 +1,14 @@
+# Blog batch — long-form regional-cuisine & local-food travel guides.
+# Real URLs (verified reachable at curation time, 2026-11-07). Dead links are
+# skipped by the ingester. Add more as you find good region-specific guides.
+# Run:  bash scripts/run_batch.sh blog scripts/batches/cuisine_sports_blogs.txt
+
+https://realitytoursandtravel.com/indian-cuisine-travel-guide/
+https://www.oneworld365.org/blog/foods-you-have-to-try-in-india
+# enjoytravel.com returns 403 to our fetcher (bot-blocked) — skipped.
+# https://www.enjoytravel.com/en/travel-news/food-and-drink/best-regional-indian-dishes
+https://gstarlink.com/blogs/travel-guides/food-lovers-guide-india-regional-dishes
+https://travelopod.com/blog/post/foodie-s-delight-a-guide-to-regional-indian-cuisine-you-can-t-miss-on-your-trip
+
+# --- add local-sports / folk-games guides here as you find them, e.g. ---
+# https://<blog>/traditional-indian-sports-and-where-to-see-them
