@@ -15,6 +15,8 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+import requests
+
 from youtube_transcript_api import (
     YouTubeTranscriptApi,
     NoTranscriptFound,
@@ -61,6 +63,34 @@ def _throttle_before_fetch() -> None:
         _PACE_FILE.write_text(str(time.time()))
     except OSError:
         pass
+
+
+# --- HTTP timeout ------------------------------------------------------------
+# youtube-transcript-api uses requests with NO timeout by default, so a stalled
+# YouTube socket can hang a fetch FOREVER — which once froze a whole retry batch
+# for ~2h on a single video. We pass our own Session that injects a (connect,
+# read) timeout on every request, so a dead socket fails fast instead of hanging.
+# Tune with env TRANSCRIPT_HTTP_TIMEOUT_SEC (read timeout; connect is capped at 10s).
+def _http_timeout() -> tuple[float, float]:
+    try:
+        read = max(1.0, float(os.getenv("TRANSCRIPT_HTTP_TIMEOUT_SEC", "20")))
+    except ValueError:
+        read = 20.0
+    return (min(read, 10.0), read)  # (connect, read)
+
+
+class _TimeoutSession(requests.Session):
+    """requests.Session that applies a default (connect, read) timeout to every
+    request unless one is passed explicitly. The transcript library never sets a
+    timeout itself, so this is where we enforce it."""
+
+    def __init__(self, timeout: tuple[float, float]):
+        super().__init__()
+        self._default_timeout = timeout
+
+    def request(self, *args, **kwargs):  # noqa: D401
+        kwargs.setdefault("timeout", self._default_timeout)
+        return super().request(*args, **kwargs)
 
 
 def _proxy_config():
@@ -127,7 +157,12 @@ def _pick_transcript(tlist, langs: list[str]):
 def fetch_transcript(video_id: str, default_language: str | None = None) -> TranscriptResult:
     """Retrieve the best available transcript. Raises TranscriptError if none."""
     _throttle_before_fetch()
-    api = YouTubeTranscriptApi(proxy_config=_proxy_config())
+    # Pass our own timeout-enforcing session; the library still applies any
+    # proxy_config onto it, so proxy support is unaffected.
+    api = YouTubeTranscriptApi(
+        proxy_config=_proxy_config(),
+        http_client=_TimeoutSession(_http_timeout()),
+    )
     try:
         tlist = api.list(video_id)
     except (TranscriptsDisabled, NoTranscriptFound, VideoUnavailable) as e:
@@ -135,6 +170,9 @@ def fetch_transcript(video_id: str, default_language: str | None = None) -> Tran
     except CouldNotRetrieveTranscript as e:
         # covers IpBlocked / RequestBlocked / PoTokenRequired etc.
         raise TranscriptError(f"transcript fetch blocked: {type(e).__name__}")
+    except requests.exceptions.RequestException as e:
+        # connect/read timeout or other network error — fail fast, never hang
+        raise TranscriptError(f"transcript fetch timeout/network: {type(e).__name__}")
 
     transcript_obj, source = _pick_transcript(tlist, _lang_priority(default_language))
     if transcript_obj is None:
@@ -144,6 +182,8 @@ def fetch_transcript(video_id: str, default_language: str | None = None) -> Tran
         raw = transcript_obj.fetch().to_raw_data()  # [{text, start, duration}, ...]
     except CouldNotRetrieveTranscript as e:
         raise TranscriptError(f"transcript fetch failed: {type(e).__name__}")
+    except requests.exceptions.RequestException as e:
+        raise TranscriptError(f"transcript fetch timeout/network: {type(e).__name__}")
 
     # Build timestamped text so Stage 5 can cite timestamp_seconds per claim.
     lines = [

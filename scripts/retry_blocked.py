@@ -21,6 +21,7 @@ LLM extraction env (LLM_API_KEY/BASE_URL/MODEL) must be set by the caller
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -76,13 +77,25 @@ def drain(max_n: int) -> int:
     print(f"[retry] draining {len(rows)} blocked sources (of {count_blocked()} total)")
     recovered = 0
     consecutive_block = 0
+    # Hard ceiling on one video's full run.py pass, so a single stuck video can
+    # never freeze the whole drain (it once hung ~2h). Tune with RUN_TIMEOUT_SEC.
+    try:
+        run_timeout = max(30, int(os.getenv("RUN_TIMEOUT_SEC", "180")))
+    except ValueError:
+        run_timeout = 180
     for i, row in enumerate(rows, 1):
         url = row["url"] or f"https://youtu.be/{row['video_id']}"
-        r = subprocess.run(
-            [sys.executable, "scripts/run.py", url, "--force"],
-            capture_output=True, text=True,
-        )
-        out = (r.stdout + r.stderr)
+        try:
+            r = subprocess.run(
+                [sys.executable, "scripts/run.py", url, "--force"],
+                capture_output=True, text=True, timeout=run_timeout,
+            )
+            out = (r.stdout + r.stderr)
+        except subprocess.TimeoutExpired:
+            # Stuck video — skip it (not a block signal), move on.
+            consecutive_block = 0
+            print(f"[retry] [{i}/{len(rows)}] TIMEOUT>{run_timeout}s (skipped): {url}")
+            continue
         if "extracted" in out and "stage5] ok" in out:
             recovered += 1
             consecutive_block = 0
