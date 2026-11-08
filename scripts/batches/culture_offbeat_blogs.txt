@@ -1,0 +1,16 @@
+# Blog batch — India culture/festivals/crafts + offbeat & northeast destinations.
+# Real URLs, verified reachable (200 via browser UA) at curation time 2026-11-08.
+# Adds breadth beyond the metros: folk arts, craft melas, hidden/NE places.
+# Run:  bash scripts/run_batch.sh blog scripts/batches/culture_offbeat_blogs.txt
+
+# --- festivals / folk arts / crafts ---
+https://www.tourmyindia.com/blog/?p=47883
+https://memorableindia.com/?p=8266
+https://www.itokri.com/blogs/craft-masala-by-itokri/famous-art-and-crafts-mela-of-india
+
+# --- offbeat / hidden / northeast India ---
+https://homegrown.co.in/article/803888/explore-the-unknown-the-lesser-known-attractions-and-hidden-gems-that-india-has-to-offer
+https://www.easemytrip.com/blog/unexplored-places-in-north-east-india
+https://www.easemytrip.com/blog/hidden-places-in-india-most-tourists-dont-know
+https://eastmojo.com/travel/2021/11/16/10-offbeat-destinations-to-visit-in-northeast-india/
+https://www.sentinelassam.com/more-news/entertainment/10-hidden-gems-in-northeast-india-youve-never-heard-of

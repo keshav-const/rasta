@@ -9,7 +9,9 @@
 # Cook Like An Aunty — history + cultural significance of Indian dishes (Buzzsprout RSS, verified).
 https://feeds.buzzsprout.com/2202743.rss
 
+# Beyond Butter Chicken — regional Indian cooking beyond the familiar (Captivate RSS, verified).
+https://feeds.captivate.fm/beyond-butter-chicken/
+
 # --- add more once you have their RSS feed URLs (resolve from Apple/Spotify page) ---
-# Beyond Butter Chicken (regional Indian cooking) — find RSS
 # Naan Curry with Sadaf and Archit (IVM) — find RSS
 # Discovering India: The Food Safari — find RSS
