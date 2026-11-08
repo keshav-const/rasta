@@ -12,8 +12,16 @@ Only the text EXTRACTION step uses the LLM (gpt-4o-mini, cents); audio never lea
 the machine.
 
 Env:
-  WHISPER_MODEL   faster-whisper model size (default 'base'; 'small' = better/slower)
-  LLM_API_KEY/... the usual extractor LLM config
+  WHISPER_MODEL        faster-whisper model size (default 'base'; 'tiny' = ~2-3x faster,
+                       'small' = better/slower)
+  WHISPER_CPU_THREADS  CPU threads for transcription (default: all cores)
+  PODCAST_MAX_MINUTES  cap decoded audio length so one long episode can't run for hours
+                       (default 40; 0 = no cap)
+  LLM_API_KEY/...      the usual extractor LLM config
+
+Speed/robustness: already-ingested episodes are skipped BEFORE download/transcribe
+(dedup by audio URL); transcription is greedy (beam_size=1) with silence skipped
+(VAD) and length-capped, so a single podcast costs minutes, not hours.
 
 Usage:
   python scripts/ingest_podcast.py <rss_url> [<rss_url> ...] [--limit 2]
@@ -35,6 +43,7 @@ import feedparser
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from pipeline import db  # noqa: E402
 from pipeline.ingest import ingest_text_source  # noqa: E402
 
 UA = {"User-Agent": "RastaBot/1.0 (github.com/keshav-const/rasta)"}
@@ -48,9 +57,36 @@ def _get_model():
     if _MODEL is None:
         from faster_whisper import WhisperModel
         name = os.getenv("WHISPER_MODEL", "base")
-        print(f"[podcast] loading faster-whisper model '{name}' (first run downloads it)…")
-        _MODEL = WhisperModel(name, device="cpu", compute_type="int8")
+        try:
+            threads = int(os.getenv("WHISPER_CPU_THREADS", "") or (os.cpu_count() or 4))
+        except ValueError:
+            threads = os.cpu_count() or 4
+        print(f"[podcast] loading faster-whisper model '{name}' ({threads} threads; "
+              f"first run downloads it)…")
+        _MODEL = WhisperModel(name, device="cpu", compute_type="int8", cpu_threads=threads)
     return _MODEL
+
+
+def _max_minutes() -> int:
+    try:
+        return max(0, int(os.getenv("PODCAST_MAX_MINUTES", "40")))
+    except ValueError:
+        return 40
+
+
+def _already_ingested(key_id: str) -> bool:
+    """True if this episode is already extracted/resolved — so we can skip the
+    expensive download + transcribe + extract entirely on a re-run."""
+    try:
+        with db.connect() as c:
+            row = c.execute("select status from sources where video_id=%s", (key_id,)).fetchone()
+        return bool(row and row["status"] in ("extracted", "resolved"))
+    except Exception:  # noqa: BLE001 — never let a dedup check block ingestion
+        return False
+
+
+def _episode_key(audio_url: str, title: str) -> str:
+    return "podcast_" + hashlib.sha1((audio_url or title).encode()).hexdigest()[:12]
 
 
 def _download(url: str, dest: Path) -> None:
@@ -60,19 +96,28 @@ def _download(url: str, dest: Path) -> None:
             f.write(chunk)
 
 
-def _to_wav16k(src: Path, dest: Path) -> None:
-    """Decode to mono 16 kHz WAV — the format whisper wants."""
-    subprocess.run(
-        ["ffmpeg", "-y", "-i", str(src), "-ac", "1", "-ar", "16000", str(dest)],
-        check=True, capture_output=True,
-    )
+def _to_wav16k(src: Path, dest: Path, max_seconds: int) -> None:
+    """Decode to mono 16 kHz WAV — the format whisper wants. max_seconds>0 caps the
+    duration (ffmpeg -t) so a 2-hour episode can't become a 2-hour transcription."""
+    cmd = ["ffmpeg", "-y", "-i", str(src), "-ac", "1", "-ar", "16000"]
+    if max_seconds > 0:
+        cmd += ["-t", str(max_seconds)]
+    cmd.append(str(dest))
+    subprocess.run(cmd, check=True, capture_output=True)
 
 
 def transcribe(audio: Path, workdir: Path) -> str:
     wav = workdir / "audio16k.wav"
-    _to_wav16k(audio, wav)
+    _to_wav16k(audio, wav, _max_minutes() * 60)
     model = _get_model()
-    segments, _info = model.transcribe(str(wav), vad_filter=True)
+    # Greedy (beam_size=1) + VAD (skip silence) + no cross-segment conditioning:
+    # several times faster on CPU than the beam-5 default, and avoids repetition loops.
+    segments, _info = model.transcribe(
+        str(wav),
+        vad_filter=True,
+        beam_size=1,
+        condition_on_previous_text=False,
+    )
     return " ".join(seg.text.strip() for seg in segments).strip()
 
 
@@ -86,6 +131,11 @@ def ingest_episode(feed_title: str, entry) -> None:
     title = entry.get("title", "untitled")
     if not audio_url:
         print(f"[podcast] skip (no audio): {title[:60]}")
+        return
+
+    key_id = _episode_key(audio_url, title)
+    if _already_ingested(key_id):
+        print(f"[podcast] skip (already ingested): {title[:55]}")
         return
 
     with tempfile.TemporaryDirectory() as td:
@@ -103,7 +153,6 @@ def ingest_episode(feed_title: str, entry) -> None:
         print(f"[podcast] skip (transcript too short): {title[:50]}")
         return
     url = entry.get("link") or audio_url
-    key_id = "podcast_" + hashlib.sha1((audio_url or title).encode()).hexdigest()[:12]
     print(f"[podcast]   transcript {len(text)} chars — extracting…")
     res = ingest_text_source(
         platform="podcast", source_key=key_id, url=url, title=title,
