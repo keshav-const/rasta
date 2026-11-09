@@ -1,0 +1,71 @@
+# Heritage, arts & crafts batch — classical/folk dances, crafts (GI), monuments,
+# forts/palaces, UNESCO sites and major festivals (Wikipedia titles).
+# Deepens the cultural graph across India. Run:
+#   bash scripts/run_batch.sh wikipedia scripts/batches/heritage_arts_wikipedia.txt
+
+# --- classical & folk dances (performing_art) ---
+Bharatanatyam
+Kathak
+Kuchipudi
+Odissi
+Sattriya
+Manipuri dance
+Mohiniyattam
+Chhau dance
+Yakshagana
+Lavani
+Ghoomar
+Bihu dance
+Kalbelia
+Dollu Kunitha
+Bhangra (dance)
+
+# --- crafts & folk art (craft / art_form) ---
+Madhubani art
+Warli painting
+Pattachitra
+Gond art
+Kalamkari
+Phad painting
+Tanjore painting
+Bidriware
+Pashmina
+Chikan (embroidery)
+Bandhani
+Blue pottery
+Channapatna toys
+Dhokra
+Pochampally Ikat
+Zardozi
+Meenakari
+
+# --- monuments, forts, palaces, UNESCO sites (poi / attraction) ---
+Hampi
+Khajuraho Group of Monuments
+Konark Sun Temple
+Ajanta Caves
+Ellora Caves
+Sanchi
+Mahabalipuram
+Rani ki vav
+Fatehpur Sikri
+Qutb Minar
+Mehrangarh
+Amer Fort
+Chittor Fort
+Meenakshi Temple
+Brihadisvara Temple, Thanjavur
+Charminar
+Golconda Fort
+Jaisalmer Fort
+City Palace, Udaipur
+
+# --- major festivals (festival) ---
+Durga Puja
+Ganesh Chaturthi
+Onam
+Pongal (festival)
+Chhath Puja
+Kumbh Mela
+Thrissur Pooram
+Hemis festival

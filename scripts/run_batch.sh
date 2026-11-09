@@ -51,8 +51,18 @@ case "$MODE" in
       python scripts/ingest_podcast.py "$rss" --limit "${PODCAST_LIMIT:-2}"
     done
     ;;
+  video)
+    # YouTube videos via the full pipeline. Pace transcript pulls to avoid IP blocks;
+    # stage4's HTTP timeout keeps any single fetch from hanging.
+    export TRANSCRIPT_MIN_INTERVAL_SEC="${TRANSCRIPT_MIN_INTERVAL_SEC:-10}"
+    export TRANSCRIPT_HTTP_TIMEOUT_SEC="${TRANSCRIPT_HTTP_TIMEOUT_SEC:-20}"
+    for url in "${ITEMS[@]}"; do
+      echo "[batch:video] $url"
+      python scripts/run.py "$url" --force || echo "[batch:video] failed: $url"
+    done
+    ;;
   *)
-    echo "unknown mode: $MODE (expected wikipedia|blog|podcast)"; exit 2
+    echo "unknown mode: $MODE (expected wikipedia|blog|podcast|video)"; exit 2
     ;;
 esac
 echo "[batch:$MODE] done"

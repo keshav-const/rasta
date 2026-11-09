@@ -2,3 +2,6 @@ python-dotenv>=1.0
 psycopg[binary]>=3.2
 requests>=2.32
 youtube-transcript-api>=1.2
+feedparser>=6.0        # podcast RSS parsing (ingest_podcast.py)
+faster-whisper>=1.0    # local podcast transcription (ingest_podcast.py); needs ffmpeg on PATH
+yt-dlp>=2025.10        # reliable YouTube video-id search for curated video batches

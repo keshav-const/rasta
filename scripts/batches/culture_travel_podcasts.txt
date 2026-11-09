@@ -1,0 +1,12 @@
+# Culture / travel / history podcasts (local whisper). RSS feeds verified
+# reachable (200) 2026-11-09 via the iTunes search API.
+# Run:  PODCAST_LIMIT=2 bash scripts/run_batch.sh podcast scripts/batches/culture_travel_podcasts.txt
+
+# The Musafir Stories — India travel podcast (place-by-place episodes).
+https://www.omnycontent.com/d/playlist/e0dce4b3-2eb8-48cb-822c-af1d00e03e20/64cf3a81-17df-40ec-990a-af4e00a92e51/f5b69943-5379-4176-a258-af4e00a92e72/podcast.rss
+
+# Live History India — heritage, monuments, history.
+https://anchor.fm/s/190312b8/podcast/rss
+
+# Heritage of India — culture & heritage.
+https://anchor.fm/s/88ebb58/podcast/rss

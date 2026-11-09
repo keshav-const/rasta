@@ -1,0 +1,19 @@
+# Video batch — curated via yt-dlp ytsearch (real IDs), 2026-11-09.
+# Themes: classical dance, crafts/handloom, heritage sites, regional street food.
+# Run:  bash scripts/run_batch.sh  -- NOTE: videos go through run.py, see wrapper.
+https://youtu.be/I8YKWO3sCg8
+https://youtu.be/5GzbkWoeEAM
+https://youtu.be/QBQ3cV3Hs6c
+https://youtu.be/GBbcYtkqVKQ
+https://youtu.be/CpMefe680v8
+https://youtu.be/GZk-kiT6cq0
+https://youtu.be/Fl4Z-_1jxTA
+https://youtu.be/rqLtR0l3ZsQ
+https://youtu.be/ltIPaVfYFyA
+https://youtu.be/0F2TW_ff24Y
+https://youtu.be/Kk7qAVJYbyk
+https://youtu.be/NW4NuGxI1BY
+https://youtu.be/B3VL77hAHBE
+https://youtu.be/vG-5Wf0OPBU
+https://youtu.be/Tb5dB2LEMsg
+https://youtu.be/YW61WmnB8K4
