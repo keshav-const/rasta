@@ -62,6 +62,30 @@ export async function verifySessionToken(token: string | undefined): Promise<boo
   }
 }
 
+/** Generic: sign an arbitrary JSON payload as `<payload>.<sig>` with `secret`.
+ *  Shared by the developer-portal session (see lib/devauth.ts). Edge-safe. */
+export async function signPayload(obj: unknown, secret: string): Promise<string> {
+  const payload = toB64Url(enc.encode(JSON.stringify(obj)));
+  const key = await hmacKey(secret);
+  const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(payload)));
+  return `${payload}.${toB64Url(sig)}`;
+}
+
+/** Generic: verify + decode a `signPayload` token, or null if tampered/invalid. */
+export async function verifyPayload<T>(token: string | undefined, secret: string): Promise<T | null> {
+  if (!token) return null;
+  const [payload, sig] = token.split(".");
+  if (!payload || !sig) return null;
+  try {
+    const key = await hmacKey(secret);
+    const ok = await crypto.subtle.verify("HMAC", key, fromB64Url(sig) as BufferSource, enc.encode(payload));
+    if (!ok) return null;
+    return JSON.parse(dec.decode(fromB64Url(payload))) as T;
+  } catch {
+    return null;
+  }
+}
+
 /** Constant-time-ish password check against ADMIN_PASSWORD. Fails closed if unset. */
 export function verifyPassword(input: string): boolean {
   const expected = process.env.ADMIN_PASSWORD ?? "";
