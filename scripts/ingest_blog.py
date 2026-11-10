@@ -52,6 +52,17 @@ def html_to_text(html: str) -> tuple[str, str]:
 
 
 def ingest_url(url: str) -> None:
+    # Dedup before fetching: skip URLs already ingested (saves the fetch + extract).
+    key = "blog_" + hashlib.sha1(url.encode()).hexdigest()[:12]
+    try:
+        from pipeline import db
+        with db.connect() as c:
+            ex = db.find_source_by_video_id(c, key)
+        if ex and ex.get("status") in ("extracted", "resolved"):
+            print(f"[blog] skip (already ingested): {url}")
+            return
+    except Exception:  # noqa: BLE001 — never let a dedup check block ingestion
+        pass
     try:
         r = requests.get(url, headers=UA, timeout=25)
         r.raise_for_status()
@@ -63,7 +74,6 @@ def ingest_url(url: str) -> None:
     text = text[:18000]
     site = urlparse(url).netloc.replace("www.", "")
     print(f"[blog] {site} | \"{title[:70]}\" | {len(text)} chars")
-    key = "blog_" + hashlib.sha1(url.encode()).hexdigest()[:12]
     res = ingest_text_source(
         platform="blog", source_key=key, url=url,
         title=title or site, text=text, creator_name=site, trust_source=True,

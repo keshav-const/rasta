@@ -58,7 +58,9 @@ case "$MODE" in
     export TRANSCRIPT_HTTP_TIMEOUT_SEC="${TRANSCRIPT_HTTP_TIMEOUT_SEC:-20}"
     for url in "${ITEMS[@]}"; do
       echo "[batch:video] $url"
-      python scripts/run.py "$url" --force || echo "[batch:video] failed: $url"
+      # No --force: run.py skips videos already processed (dedup); the blocked-video
+      # drain (retry_blocked.py) uses --force when it genuinely needs to re-fetch.
+      python scripts/run.py "$url" || echo "[batch:video] failed: $url"
     done
     ;;
   *)

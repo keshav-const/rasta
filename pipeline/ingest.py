@@ -34,6 +34,14 @@ def ingest_text_source(
     if len(text) < 200:
         return {"ok": False, "reason": "too_little_text", "chars": len(text)}
 
+    # Dedup: if this exact source was already extracted/resolved, skip the (costly)
+    # gate + extract entirely. A previously-FAILED source is NOT skipped (it retries).
+    with db.connect() as conn:
+        existing = db.find_source_by_video_id(conn, source_key)
+    if existing and existing.get("status") in ("extracted", "resolved"):
+        return {"ok": False, "reason": "already_ingested", "skipped": True,
+                "entities": 0, "claims": 0}
+
     meta = {
         "platform": platform, "url": url, "video_id": source_key,
         "title": title, "description": text[:600], "creator_name": creator_name,
