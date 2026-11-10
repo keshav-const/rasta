@@ -108,6 +108,29 @@ All three live in `app/developers/actions.ts` as **Server Actions** (`"use serve
 Both mutations call `revalidatePath('/developers/dashboard')` so the re-rendered list ships in the
 **same HTTP response** as the action (the Next single-roundtrip model).
 
+## 4a. Usage view (M3 inc 3)
+
+The dashboard shows how much each key is being used. The counting happens **on the API**, the
+display happens here:
+
+- **The Go API records usage.** On every authenticated request it does a fire-and-forget upsert
+  into `api_usage(api_key_id, day, requests)` — one row per key per day — and stamps
+  `last_used_at`, in one round-trip (`RecordKeyUsage`, see API ADR-019). Day is bucketed in
+  **UTC** so it matches the dashboard. Keyless (anonymous) calls have no key id, so they aren't
+  attributed to anyone.
+- **The dashboard reads + aggregates.** `page.tsx` fetches the last 30 days of `api_usage` for the
+  developer's own key ids (the table has no `user_id`, so we scope by the key ids we just read).
+  `lib/usage.ts` is a **pure** aggregator: it folds the rows into `{ today, last7, last30, spark[14] }`
+  per key and an account summary. `KeyManager` renders the summary stats, per-key counts, and a tiny
+  14-day SVG sparkline.
+
+**Why count on the API and not here?** The API is the only thing that sees requests. **Why a daily
+upsert and not an event row per request?** One row per key per day is tiny, durable, and already the
+shape the view needs — no roll-up job, no unbounded log. It's a usage *meter*, not billing-grade
+accounting (that tightens in M4). **Why UTC in both places?** `lib/usage.ts` computes day windows
+with `toISOString()` (UTC); the API buckets with `(now() at time zone 'utc')::date` — so a request
+and its dashboard bucket never land on different calendar days because of a server timezone.
+
 ### Security: a Server Action is a public POST endpoint
 
 This is the subtle, important part. Rendering a form only on an authenticated page is **not** a
@@ -131,11 +154,12 @@ web/
     devauth.ts      # dev_session cookie: createDevSessionToken, readDevSession, supabaseAuthClient (anon)
     supabase.ts     # supabaseAdmin() — service_role client (server-only)
     apikey.ts       # mintApiKey() — the khoj_ key format (MUST match Go)
+    usage.ts        # pure: aggregate api_usage rows → per-key totals + 14-day sparkline
   app/developers/
     actions.ts                      # signup/login/logout + createKey/revokeKey (Server Actions)
     login/ signup/ page.tsx         # auth forms
-    dashboard/page.tsx              # protected; reads the user's keys → KeyManager
-    dashboard/_components/KeyManager.tsx   # client: create form, one-time reveal, revoke list
+    dashboard/page.tsx              # protected; reads the user's keys + usage → KeyManager
+    dashboard/_components/KeyManager.tsx   # client: usage summary, create form, reveal, per-key usage + revoke
 ```
 
 ---

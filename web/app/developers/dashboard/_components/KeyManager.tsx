@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { createKey, revokeKey, type CreateKeyResult } from "../../actions";
+import type { KeyUsage } from "@/lib/usage";
 
 export type KeyRow = {
   id: string;
@@ -12,6 +13,41 @@ export type KeyRow = {
   lastUsedAt: string | null;
   revokedAt: string | null;
 };
+
+const nf = new Intl.NumberFormat();
+
+/** Tiny 14-day bar sparkline. Theme-aware (vermilion on currentColor track),
+ *  scales to the window's peak; all-zero windows render a flat baseline. */
+function Sparkline({ data }: { data: number[] }) {
+  const max = Math.max(1, ...data);
+  const w = 3;
+  const gap = 1.5;
+  const h = 18;
+  return (
+    <svg
+      width={data.length * (w + gap)}
+      height={h}
+      className="text-line"
+      aria-hidden
+      role="img"
+    >
+      {data.map((v, i) => {
+        const bh = v > 0 ? Math.max(1.5, (v / max) * h) : 1;
+        return (
+          <rect
+            key={i}
+            x={i * (w + gap)}
+            y={h - bh}
+            width={w}
+            height={bh}
+            rx={0.5}
+            className={v > 0 ? "fill-vermilion" : "fill-current"}
+          />
+        );
+      })}
+    </svg>
+  );
+}
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ?? "https://khoj-ibli.onrender.com";
@@ -66,7 +102,26 @@ function KeyReveal({ rawKey }: { rawKey: string }) {
   );
 }
 
-export default function KeyManager({ keys }: { keys: KeyRow[] }) {
+type Summary = { today: number; last7: number; last30: number };
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex-1">
+      <div className="font-display text-xl font-semibold text-ink">{nf.format(value)}</div>
+      <div className="text-[11px] uppercase tracking-[0.14em] text-ink-mute">{label}</div>
+    </div>
+  );
+}
+
+export default function KeyManager({
+  keys,
+  usage,
+  summary,
+}: {
+  keys: KeyRow[];
+  usage: Record<string, KeyUsage>;
+  summary: Summary;
+}) {
   const [state, formAction, pending] = useActionState<CreateKeyResult | null, FormData>(
     createKey,
     null,
@@ -74,7 +129,23 @@ export default function KeyManager({ keys }: { keys: KeyRow[] }) {
   const active = keys.filter((k) => !k.revokedAt);
 
   return (
-    <div className="rounded-2xl border border-line bg-paper-card p-6">
+    <div className="space-y-6">
+      {/* Usage summary — across all keys (incl. revoked), last 30 days */}
+      <div className="rounded-2xl border border-line bg-paper-card p-6">
+        <h2 className="mb-4 font-display text-lg font-semibold text-ink">Usage</h2>
+        <div className="flex gap-4">
+          <Stat label="Today" value={summary.today} />
+          <Stat label="Last 7 days" value={summary.last7} />
+          <Stat label="Last 30 days" value={summary.last30} />
+        </div>
+        <p className="mt-3 text-xs text-ink-mute">
+          Counts authenticated requests to the live API. Keyless (anonymous) calls aren’t
+          attributed to a key.
+        </p>
+      </div>
+
+      {/* Keys */}
+      <div className="rounded-2xl border border-line bg-paper-card p-6">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <h2 className="font-display text-lg font-semibold text-ink">API keys</h2>
@@ -115,34 +186,48 @@ export default function KeyManager({ keys }: { keys: KeyRow[] }) {
         </p>
       ) : (
         <ul className="divide-y divide-line">
-          {active.map((k) => (
-            <li key={k.id} className="flex items-center justify-between gap-4 py-3">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-medium text-ink">{k.name}</span>
-                  <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">
-                    {k.plan}
-                  </span>
+          {active.map((k) => {
+            const u = usage[k.id];
+            return (
+              <li key={k.id} className="flex items-center justify-between gap-4 py-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-medium text-ink">{k.name}</span>
+                    <span className="rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-wide text-ink-soft">
+                      {k.plan}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-ink-mute">
+                    <code className="font-mono">{k.prefix}…</code>
+                    <span>created {fmtDate(k.createdAt)}</span>
+                    <span>last used {fmtDate(k.lastUsedAt)}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-ink-soft">
+                    <span className="font-medium text-ink">{nf.format(u?.today ?? 0)}</span> today
+                    <span className="text-ink-mute"> · </span>
+                    <span className="font-medium text-ink">{nf.format(u?.last7 ?? 0)}</span> last 7d
+                    <span className="text-ink-mute"> · </span>
+                    <span className="font-medium text-ink">{nf.format(u?.last30 ?? 0)}</span> last 30d
+                  </div>
                 </div>
-                <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-ink-mute">
-                  <code className="font-mono">{k.prefix}…</code>
-                  <span>created {fmtDate(k.createdAt)}</span>
-                  <span>last used {fmtDate(k.lastUsedAt)}</span>
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <Sparkline data={u?.spark ?? new Array(14).fill(0)} />
+                  <form action={revokeKey}>
+                    <input type="hidden" name="id" value={k.id} />
+                    <button
+                      type="submit"
+                      className="rounded-lg border border-line px-3 py-1.5 text-xs text-ink-soft transition hover:border-vermilion hover:text-vermilion"
+                    >
+                      Revoke
+                    </button>
+                  </form>
                 </div>
-              </div>
-              <form action={revokeKey}>
-                <input type="hidden" name="id" value={k.id} />
-                <button
-                  type="submit"
-                  className="shrink-0 rounded-lg border border-line px-3 py-1.5 text-xs text-ink-soft transition hover:border-vermilion hover:text-vermilion"
-                >
-                  Revoke
-                </button>
-              </form>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
+      </div>
     </div>
   );
 }

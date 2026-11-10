@@ -1,6 +1,13 @@
 import { redirect } from "next/navigation";
 import { readDevSession } from "@/lib/devauth";
 import { supabaseAdmin } from "@/lib/supabase";
+import {
+  aggregateUsage,
+  summarize,
+  lastNDays,
+  USAGE_WINDOW_DAYS,
+  type UsageRow,
+} from "@/lib/usage";
 import { logout } from "../actions";
 import KeyManager, { type KeyRow } from "./_components/KeyManager";
 
@@ -10,9 +17,11 @@ export default async function DeveloperDashboard() {
   const session = await readDevSession();
   if (!session) redirect("/developers/login");
 
+  const admin = supabaseAdmin();
+
   // Keys scoped to the signed-in developer. Never selects key_hash — the raw key
   // is unrecoverable by design, and the hash has no business reaching the client.
-  const { data } = await supabaseAdmin()
+  const { data } = await admin
     .from("api_keys")
     .select("id,name,key_prefix,plan,created_at,last_used_at,revoked_at")
     .eq("user_id", session.sub)
@@ -26,6 +35,22 @@ export default async function DeveloperDashboard() {
     lastUsedAt: k.last_used_at,
     revokedAt: k.revoked_at,
   }));
+
+  // Usage: read the last 30 days of api_usage for THIS developer's keys only
+  // (api_usage has no user_id, so we scope by the key ids we just fetched).
+  const keyIds = keys.map((k) => k.id);
+  let usageRows: UsageRow[] = [];
+  if (keyIds.length) {
+    const since = lastNDays(USAGE_WINDOW_DAYS)[0];
+    const { data: u } = await admin
+      .from("api_usage")
+      .select("api_key_id, day, requests")
+      .in("api_key_id", keyIds)
+      .gte("day", since);
+    usageRows = (u ?? []) as UsageRow[];
+  }
+  const usage = aggregateUsage(usageRows);
+  const summary = summarize(usage);
 
   return (
     <div className="min-h-screen bg-paper px-6 py-12">
@@ -58,7 +83,7 @@ export default async function DeveloperDashboard() {
           Signed in as <span className="font-medium text-ink">{session.email}</span>.
         </p>
 
-        <KeyManager keys={keys} />
+        <KeyManager keys={keys} usage={usage} summary={summary} />
       </div>
     </div>
   );
