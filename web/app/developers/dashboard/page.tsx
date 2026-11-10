@@ -1,12 +1,31 @@
 import { redirect } from "next/navigation";
 import { readDevSession } from "@/lib/devauth";
+import { supabaseAdmin } from "@/lib/supabase";
 import { logout } from "../actions";
+import KeyManager, { type KeyRow } from "./_components/KeyManager";
 
 export const dynamic = "force-dynamic";
 
 export default async function DeveloperDashboard() {
   const session = await readDevSession();
   if (!session) redirect("/developers/login");
+
+  // Keys scoped to the signed-in developer. Never selects key_hash — the raw key
+  // is unrecoverable by design, and the hash has no business reaching the client.
+  const { data } = await supabaseAdmin()
+    .from("api_keys")
+    .select("id,name,key_prefix,plan,created_at,last_used_at,revoked_at")
+    .eq("user_id", session.sub)
+    .order("created_at", { ascending: false });
+  const keys: KeyRow[] = (data ?? []).map((k) => ({
+    id: k.id,
+    name: k.name,
+    prefix: k.key_prefix,
+    plan: k.plan,
+    createdAt: k.created_at,
+    lastUsedAt: k.last_used_at,
+    revokedAt: k.revoked_at,
+  }));
 
   return (
     <div className="min-h-screen bg-paper px-6 py-12">
@@ -39,12 +58,7 @@ export default async function DeveloperDashboard() {
           Signed in as <span className="font-medium text-ink">{session.email}</span>.
         </p>
 
-        <div className="rounded-2xl border border-line bg-paper-card p-6">
-          <h2 className="mb-1 font-display text-lg font-semibold text-ink">API keys</h2>
-          <p className="text-sm text-ink-soft">
-            Create and manage your API keys here. Coming next.
-          </p>
-        </div>
+        <KeyManager keys={keys} />
       </div>
     </div>
   );
