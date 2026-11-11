@@ -35,7 +35,13 @@ const html = `<!doctype html>
   <script
     id="api-reference"
     data-url="${SPEC_URL}"
-    data-configuration='${JSON.stringify({ theme: "default", hideClientButton: false, metaData: { title: "Khoj API Reference" } })}'
+    data-configuration='${JSON.stringify({
+      theme: "default",
+      hideClientButton: false,
+      metaData: { title: "Khoj API Reference" },
+      // Khoj accent (vermilion) so the reference matches the portal.
+      customCss: ":root{--scalar-color-accent:#ea4e1b;--scalar-color-accent-hover:#d1430f;}",
+    })}'
   ></script>
   <script src="${SCALAR}"></script>
 </body>

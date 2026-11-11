@@ -58,6 +58,14 @@ tiny **route handler** (`route.ts`, not a React page) that returns a standalone 
 
 The API's own `/swagger/` UI stays up as the raw/backup view; the portal is the primary surface.
 
+**The landing is interactive.** `/developers` shows live graph stats (fetched from `/v1/stats`) and
+an **in-page explorer** (`_components/LiveExplorer.tsx`, client) that calls the real API as you type
+a city and renders each result's **trust** (meter + source/platform counts) and **freshness** (pill)
+— the two signals that make Khoj different — plus the exact request URL + copyable `curl`. It needs
+no signup, so a developer sees the data (and the API shape) before committing. The docs intro itself
+is authored in the Go spec's `info.description` (markdown: auth, plans/rate-limits, trust/freshness,
+pagination), so Scalar renders a real getting-started, not just an endpoint dump.
+
 ---
 
 ## 2. Identity: Supabase Auth + a signed-cookie session
@@ -182,7 +190,8 @@ web/
     apikey.ts       # mintApiKey() — the khoj_ key format (MUST match Go)
     usage.ts        # pure: aggregate api_usage rows → per-key totals + 14-day sparkline
   app/developers/
-    page.tsx                        # landing — the portal front door (hero, quickstart, CTAs)
+    page.tsx                        # landing — front door: live stats + interactive explorer + CTAs
+    _components/LiveExplorer.tsx    # client: calls the live API, renders trust/freshness, shows curl
     docs/route.ts                   # API reference: standalone HTML loading Scalar on the live spec
     actions.ts                      # signup/login/logout + createKey/revokeKey (Server Actions)
     login/ signup/ page.tsx         # auth forms
