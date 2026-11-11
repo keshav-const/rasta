@@ -1,0 +1,42 @@
+# Depth+breadth videos — real IDs via yt-dlp ytsearch, 2026-11-11.
+# Adds video (platform diversity) to popular/new cities so entities reach 2+ sources.
+# q: Jaipur travel guide places to visit food
+https://youtu.be/rm_j6O8y148
+https://youtu.be/zcxxmJL5bPw
+https://youtu.be/IR3DX9hfOQs
+# q: Udaipur travel guide places to visit
+https://youtu.be/sndxl2spsYs
+https://youtu.be/0hRBXSXlTB0
+https://youtu.be/n_paGRsYk84
+# q: Goa travel guide best beaches places
+https://youtu.be/L4_6G54AzJA
+https://youtu.be/F3YGYr37QFI
+https://youtu.be/B__7p-i7Zs0
+# q: Pune places to visit travel guide
+https://youtu.be/6pGw3dzYoGM
+https://youtu.be/mR-VdLPAgyI
+https://youtu.be/0oHzhSSI3cM
+# q: Mysore places to visit travel guide
+https://youtu.be/VsyoJdKnL6g
+https://youtu.be/HhDKYtP4x2A
+https://youtu.be/nrIs3rhPKWI
+# q: Kochi Fort Kochi travel guide Kerala
+https://youtu.be/ZvTNRLyCh6Q
+https://youtu.be/itFhUXEG7Tc
+https://youtu.be/wRgRNuNgCgQ
+# q: Hampi travel guide places to visit
+https://youtu.be/uQCbJkFVZeg
+https://youtu.be/ZYXwVtbo8Zc
+https://youtu.be/ypbFWqAf0CU
+# q: Pondicherry travel guide places to visit
+https://youtu.be/rxBakz5jE2o
+https://youtu.be/45Ibw3b28S0
+https://youtu.be/MPbZ-Sd9_BE
+# q: Amritsar Golden Temple travel guide food
+https://youtu.be/dHBWv0kXnZQ
+https://youtu.be/LKqWEgvdyZ0
+https://youtu.be/akg20SpbQEY
+# q: Jodhpur travel guide blue city places
+https://youtu.be/bxjfuV40NQo
+https://youtu.be/8fCynZfxhCc
+https://youtu.be/Tk0XnPUvCvY

@@ -1,0 +1,17 @@
+# Depth+breadth blogs — verified reachable 200 + substantial, 2026-11-11.
+# Jaipur, Hampi, Mysore, Pondicherry. Run: bash scripts/run_batch.sh blog <this>
+
+https://www.thecommonwanderer.com/blog/places-to-visit-jaipur-india
+https://www.divergenttravelers.com/things-to-do-in-jaipur/
+https://www.explorewithecokats.com/places-to-visit-jaipur/
+https://travelmelodies.com/visiting-jaipur-travel-guide/
+https://www.enidhi.net/2023/12/hampi-trip-planning-guide.html
+https://traveltriangle.com/blog/places-to-visit-in-hampi-in-2-days/
+https://www.travellingcamera.com/2026/04/hampi-travel-guide-itinerary-hotels-cost.html
+https://runawayann.com/hampi-one-day-itinerary
+https://www.inmysore.com/travel-guide/mysore-travel-guide
+https://www.zingbus.com/blog/places-to-visit-in-mysore-heritage-culture-guide/
+https://www.holidify.com/places/mysore/
+https://theculturemap.com/best-things-to-do-in-pondicherry-india/
+https://thirdeyetraveller.com/pondicherry-guide/
+https://www.wheregoesrose.com/pondicherry-travel-guide/

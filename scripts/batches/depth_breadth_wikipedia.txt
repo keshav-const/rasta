@@ -1,0 +1,74 @@
+# Depth + breadth batch (Wikipedia) — 2026-11-11.
+# Breadth: new well-known cities (Pune, Mysore, Kochi, Hampi, Pondicherry, Chandigarh,
+# Ahmedabad, Darjeeling). Depth: marquee landmarks for popular cities that had many
+# single-source entries (Jaipur, Udaipur, Goa). Run:
+#   bash scripts/run_batch.sh wikipedia scripts/batches/depth_breadth_wikipedia.txt
+
+# --- Jaipur (depth) ---
+Hawa Mahal
+Amber Fort
+City Palace, Jaipur
+Jantar Mantar, Jaipur
+Nahargarh Fort
+Jal Mahal
+Albert Hall Museum
+
+# --- Udaipur (depth) ---
+City Palace, Udaipur
+Lake Pichola
+Jag Mandir
+Fateh Sagar Lake
+Monsoon Palace
+
+# --- Goa (depth) ---
+Basilica of Bom Jesus
+Fort Aguada
+Se Cathedral
+Chapora Fort
+Calangute
+
+# --- Pune ---
+Shaniwar Wada
+Aga Khan Palace
+Sinhagad
+Dagadusheth Halwai Ganapati Temple
+Pataleshwar Cave Temple
+
+# --- Mysore ---
+Mysore Palace
+Chamundi Hills
+Brindavan Gardens
+St. Philomena's Church, Mysore
+
+# --- Kochi ---
+Fort Kochi
+Mattancherry Palace
+Paradesi Synagogue
+Chinese fishing nets
+
+# --- Hampi ---
+Virupaksha Temple
+Vittala Temple
+Hampi
+Lotus Mahal
+
+# --- Pondicherry ---
+Auroville
+Sri Aurobindo Ashram
+Promenade Beach
+
+# --- Chandigarh ---
+Rock Garden of Chandigarh
+Sukhna Lake
+Zakir Hussain Rose Garden
+
+# --- Ahmedabad ---
+Adalaj Stepwell
+Sabarmati Riverfront
+Sidi Saiyyed Mosque
+Kankaria Lake
+
+# --- Darjeeling (depth) ---
+Tiger Hill, Darjeeling
+Darjeeling Himalayan Railway
+Batasia Loop
