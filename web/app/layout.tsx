@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Rasta — the Delhi worth your time",
+  title: "Khoj — cultural data API for India",
   description:
-    "A living travel graph. The best of what the internet knows about every place in Delhi & Gurgaon, aggregated and ranked.",
+    "A provenance-first API over a verified cultural graph of India. Every result cites its independent sources, with a trust score and freshness.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
