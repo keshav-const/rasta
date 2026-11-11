@@ -1,0 +1,146 @@
+# India coverage-gap batch (Wikipedia titles) — 2026-11-11.
+# Targets regions that were at ~0 or thin in the graph: J&K, Ladakh, Assam,
+# Andaman, Bengaluru, Uttarakhand, Himachal, the NE states, Gujarat, MP, UP,
+# Bihar/Jharkhand/Chhattisgarh, and under-covered Rajasthan/MP cities.
+# Run: bash scripts/run_batch.sh wikipedia scripts/batches/india_gaps_wikipedia.txt
+
+# --- Jammu & Kashmir ---
+Dal Lake
+Gulmarg
+Pahalgam
+Sonamarg
+Shalimar Bagh, Srinagar
+Nishat Bagh
+Hazratbal Shrine
+Vaishno Devi
+Amarnath Temple
+
+# --- Ladakh ---
+Pangong Tso
+Nubra Valley
+Leh Palace
+Thiksey Monastery
+Hemis Monastery
+Shanti Stupa
+Tso Moriri
+Khardung La
+
+# --- Assam ---
+Kamakhya Temple
+Majuli
+Manas National Park
+Umananda Temple
+Sivasagar
+Dibru-Saikhowa National Park
+Assam tea
+
+# --- Andaman & Nicobar ---
+Cellular Jail
+Radhanagar Beach
+Havelock Island
+Neil Island
+Ross Island
+Mahatma Gandhi Marine National Park
+
+# --- Bengaluru (Karnataka) ---
+Lalbagh
+Cubbon Park
+Bangalore Palace
+Vidhana Soudha
+Tipu Sultan's Summer Palace, Bangalore
+Bannerghatta National Park
+Nandi Hills
+
+# --- Uttarakhand ---
+Valley of Flowers National Park
+Jim Corbett National Park
+Nainital
+Mussoorie
+Kedarnath Temple
+Badrinath Temple
+Haridwar
+Auli
+Gangotri
+Hemkund Sahib
+
+# --- Himachal Pradesh ---
+Dharamshala
+McLeod Ganj
+Spiti Valley
+Kasol
+Rohtang Pass
+Great Himalayan National Park
+Khajjiar
+Dalhousie
+Hadimba Temple
+
+# --- Northeast (Tripura, Mizoram, Arunachal, Nagaland, Meghalaya) ---
+Ujjayanta Palace
+Neermahal
+Unakoti
+Reiek
+Tawang Monastery
+Sela Pass
+Ziro Valley
+Dzukou Valley
+Hornbill Festival
+Living root bridge
+Mawlynnong
+Cherrapunji
+Dawki
+
+# --- Gujarat ---
+Rann of Kutch
+Gir National Park
+Somnath temple
+Dwarkadhish Temple
+Statue of Unity
+Sabarmati Ashram
+Rani ki vav
+Champaner-Pavagadh Archaeological Park
+Saputara
+
+# --- Madhya Pradesh ---
+Khajuraho Group of Monuments
+Sanchi
+Bandhavgarh National Park
+Kanha National Park
+Pench National Park, India
+Gwalior Fort
+Ujjain
+Mandu, Madhya Pradesh
+Orchha
+Bhimbetka rock shelters
+Pachmarhi
+
+# --- Uttar Pradesh ---
+Fatehpur Sikri
+Agra Fort
+Sarnath
+Mathura
+Vrindavan
+Ayodhya
+Kushinagar
+Bara Imambara
+
+# --- Bihar / Jharkhand / Chhattisgarh ---
+Nalanda
+Bodh Gaya
+Mahabodhi Temple
+Betla National Park
+Hundru Falls
+Deoghar
+Chitrakote Falls
+
+# --- Rajasthan / MP under-covered cities ---
+Mehrangarh
+Umaid Bhawan Palace
+Jaisalmer Fort
+Ranthambore National Park
+Chittorgarh Fort
+Kumbhalgarh
+Mount Abu
+Pushkar
+Junagarh Fort
+Rajwada
+Lal Bagh Palace

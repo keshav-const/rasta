@@ -1,0 +1,40 @@
+# India coverage-gap videos — real IDs via yt-dlp ytsearch, 2026-11-11.
+# Gap regions: Ladakh, Kashmir, Assam, Andaman, Bengaluru, Uttarakhand,
+# Himachal, Meghalaya, Gujarat, MP. Run: bash scripts/run_batch.sh video <this>
+# q: Ladakh travel guide places to visit
+https://youtu.be/Vy_THjN2W9o
+https://youtu.be/Spy6L_9dcKE
+https://youtu.be/CopqaPBgxQE
+# q: Kashmir Srinagar travel guide
+https://youtu.be/0TEj7t2BPZ0
+https://youtu.be/EPmMwfqpH30
+https://youtu.be/4Z5ExFdhV9c
+# q: Kaziranga Assam wildlife safari
+https://youtu.be/yoyzbAGOLgc
+https://youtu.be/EK_5xL_fxjY
+# q: Andaman islands travel guide India
+https://youtu.be/RXNqi7HuNpI
+https://youtu.be/Zloizv0fQSE
+# q: Bangalore places to visit city guide
+https://youtu.be/kQ7mNpcgOBE
+https://youtu.be/OHwrfiPEuHE
+https://youtu.be/TlFksWK4vB0
+# q: Uttarakhand Nainital Mussoorie travel
+https://youtu.be/BpysfFoK_GU
+https://youtu.be/5-4Wkau3XO0
+https://youtu.be/lLUSY0udGZw
+# q: Himachal Spiti valley travel vlog
+https://youtu.be/O6JZcXKWUaM
+https://youtu.be/mNQLYJlI3iQ
+https://youtu.be/Ak4S6X1GGYc
+# q: Meghalaya Shillong Cherrapunji travel
+https://youtu.be/BnYRwim17Uk
+https://youtu.be/65-hHMMy7nw
+https://youtu.be/e2d4S_qry1Y
+# q: Gujarat Rann of Kutch travel guide
+https://youtu.be/QLg7EFMtI14
+https://youtu.be/5yC6eRAbbxI
+https://youtu.be/KhUDe1mLHdc
+# q: Khajuraho Madhya Pradesh heritage
+https://youtu.be/0XGxr08TV4E
+https://youtu.be/Kk7qAVJYbyk

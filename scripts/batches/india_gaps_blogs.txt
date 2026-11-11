@@ -1,0 +1,24 @@
+# India coverage-gap blogs — real URLs, verified reachable 200 + substantial 2026-11-11.
+# Gap regions: Ladakh, Meghalaya, Kutch/Gujarat, Andaman.
+# Run: bash scripts/run_batch.sh blog scripts/batches/india_gaps_blogs.txt
+
+# --- Ladakh ---
+https://indiasomeday.com/en/best-places-to-visit-in-ladakh/
+https://wildvoyager.com/journal/ladakh-travel-guide/
+https://www.boutindia.com/blog/ladakh-travel-guide-best-things-to-do-and-places-to-visit
+https://thrillingtravel.in/2018/03/leh-ladakh-travel-guide.html
+https://htoindia.com/blog/best-places-to-visit-in-leh-ladakh/
+
+# --- Meghalaya ---
+https://www.justwravel.com/blog/meghalaya-offbeat-travel-guide-explore-beyond-shillong-cherrapunji/
+https://taleof2backpackers.com/?p=7204
+https://travelshoebum.com/2017/04/18/a-backpacking-guide-to-meghalaya/
+
+# --- Kutch / Gujarat ---
+https://www.storiesbysoumya.com/things-to-do-kutch-gujarat-travel-guide/
+https://www.savaari.com/blog/things-to-do-in-kutch/
+https://chackojimss.blogspot.com/2023/05/rann-of-kutch-exploring-white-desert.html
+https://www.tourmyindia.com/states/gujarat/kutch.html
+
+# --- Andaman ---
+https://globalspaonline.com/travel/taking-the-blue-route-how-to-experience-andamans-key-islands-in-48-hours
