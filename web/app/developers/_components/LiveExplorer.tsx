@@ -9,7 +9,10 @@ import { useEffect, useState } from "react";
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE ?? "https://khoj-ibli.onrender.com";
 
-const CHIPS = ["jaipur", "leh", "bengaluru", "guwahati", "kutch", "varanasi", "goa", "udaipur"];
+// Well-covered city slugs (verified to return corroborated results). Note: it's
+// `bangalore`, not `bengaluru`, in the graph.
+const CHIPS = ["delhi", "leh", "varanasi", "kutch", "bangalore", "guwahati", "mumbai", "goa"];
+const MIN_SOURCES = 2; // showcase only corroborated places — the whole point of Khoj
 
 type Trust = { sources: number; platforms: number; score: number };
 type Freshness = { label: string; age_days: number | null } | null;
@@ -73,8 +76,8 @@ function PlaceCard({ p }: { p: Place }) {
 }
 
 export default function LiveExplorer() {
-  const [city, setCity] = useState("jaipur");
-  const [input, setInput] = useState("jaipur");
+  const [city, setCity] = useState("delhi");
+  const [input, setInput] = useState("delhi");
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,7 +85,7 @@ export default function LiveExplorer() {
   const [raw, setRaw] = useState<unknown>(null);
   const [copied, setCopied] = useState(false);
 
-  const path = `/v1/places?city=${encodeURIComponent(city)}&sort=trust&limit=6`;
+  const path = `/v1/places?city=${encodeURIComponent(city)}&sort=trust&min_sources=${MIN_SOURCES}&limit=6`;
   const url = API_BASE + path;
   const curl = `curl "${url}"`;
 
@@ -112,9 +115,12 @@ export default function LiveExplorer() {
           Live · talking to the real API
         </span>
       </div>
-      <h3 className="mb-4 font-display text-lg font-semibold text-ink">
+      <h3 className="font-display text-lg font-semibold text-ink">
         Try it — explore any Indian city
       </h3>
+      <p className="mb-4 text-xs text-ink-soft">
+        Showing places with <span className="font-medium text-ink">{MIN_SOURCES}+ independent sources</span>, ranked by trust.
+      </p>
 
       {/* Query bar */}
       <form
@@ -193,7 +199,7 @@ export default function LiveExplorer() {
           </p>
         ) : places.length === 0 ? (
           <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-sm text-ink-mute">
-            No places found for “{city}”. Try another city.
+            No corroborated places for “{city}” yet. Try delhi, leh, kutch or varanasi.
           </p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
