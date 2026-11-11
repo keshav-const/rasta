@@ -32,6 +32,32 @@ no write credentials for the key table and can't be made to mint keys, and the c
 owns the one privileged credential (`service_role`) in the one place that already handles
 accounts. See DECISIONS ADR "Key issuance lives in the Next app".
 
+### The portal is the single developer front door (`/developers/*`)
+
+A developer should never have to bounce between two domains. Everything developer-facing lives
+under `/developers` on this app:
+
+| Route | What it is |
+|---|---|
+| `/developers` | landing — what Khoj is, quickstart, CTAs into signup/docs/dashboard |
+| `/developers/docs` | the API reference (Scalar), rendered from the live OpenAPI spec |
+| `/developers/signup` · `/login` | account auth |
+| `/developers/dashboard` | keys + usage |
+
+**Docs are rendered here but authored in the API.** The Go service generates its OpenAPI spec
+from handler annotations (swaggo) and serves it at `/swagger/doc.json`. `/developers/docs` is a
+tiny **route handler** (`route.ts`, not a React page) that returns a standalone HTML page loading
+**Scalar** (pinned, from jsDelivr) pointed at that live spec URL. So:
+
+- **Single source of truth** — the docs can't drift from the API; they *are* the API's spec.
+- **No React/hydration fight** — Scalar owns the DOM in its own HTML document, isolated from the
+  app's React tree (that's why it's a `route.ts`, not a `page.tsx`; the two can't coexist in one
+  segment anyway).
+- **It works cross-origin** because the API sets `Access-Control-Allow-Origin: *` on the spec (and
+  on `/v1`), so Scalar's "try it" calls the live API straight from the browser.
+
+The API's own `/swagger/` UI stays up as the raw/backup view; the portal is the primary surface.
+
 ---
 
 ## 2. Identity: Supabase Auth + a signed-cookie session
@@ -156,6 +182,8 @@ web/
     apikey.ts       # mintApiKey() — the khoj_ key format (MUST match Go)
     usage.ts        # pure: aggregate api_usage rows → per-key totals + 14-day sparkline
   app/developers/
+    page.tsx                        # landing — the portal front door (hero, quickstart, CTAs)
+    docs/route.ts                   # API reference: standalone HTML loading Scalar on the live spec
     actions.ts                      # signup/login/logout + createKey/revokeKey (Server Actions)
     login/ signup/ page.tsx         # auth forms
     dashboard/page.tsx              # protected; reads the user's keys + usage → KeyManager

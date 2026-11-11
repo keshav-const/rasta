@@ -17,7 +17,7 @@ export default async function DevLoginPage({
         action={login}
         className="relative z-10 w-full max-w-sm rounded-2xl border border-line bg-paper-card p-8 shadow-sm"
       >
-        <div className="mb-6 flex items-center gap-3">
+        <Link href="/developers" className="mb-6 flex items-center gap-3">
           <span className="grid h-9 w-9 place-items-center rounded-xl bg-vermilion font-display text-lg font-semibold text-paper">
             K
           </span>
@@ -27,7 +27,7 @@ export default async function DevLoginPage({
               Developers
             </span>
           </span>
-        </div>
+        </Link>
 
         <h1 className="mb-1 font-display text-xl font-semibold text-ink">Sign in</h1>
         <p className="mb-6 text-sm text-ink-soft">Access your API keys and usage.</p>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { readDevSession } from "@/lib/devauth";
 import { supabaseAdmin } from "@/lib/supabase";
@@ -57,7 +58,7 @@ export default async function DeveloperDashboard() {
       <div className="grain pointer-events-none absolute inset-0" />
       <div className="relative z-10 mx-auto max-w-2xl">
         <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <Link href="/developers" className="flex items-center gap-3">
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-vermilion font-display text-lg font-semibold text-paper">
               K
             </span>
@@ -67,15 +68,23 @@ export default async function DeveloperDashboard() {
                 Developers
               </span>
             </span>
-          </div>
-          <form action={logout}>
-            <button
-              type="submit"
-              className="rounded-xl border border-line px-3.5 py-2 text-sm text-ink-soft transition hover:border-ink hover:text-ink"
+          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/developers/docs"
+              className="rounded-xl px-3.5 py-2 text-sm text-ink-soft transition hover:text-ink"
             >
-              Sign out
-            </button>
-          </form>
+              Docs
+            </Link>
+            <form action={logout}>
+              <button
+                type="submit"
+                className="rounded-xl border border-line px-3.5 py-2 text-sm text-ink-soft transition hover:border-ink hover:text-ink"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
         </div>
 
         <h1 className="mb-1 font-display text-2xl font-semibold text-ink">Dashboard</h1>
