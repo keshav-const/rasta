@@ -2,23 +2,44 @@
 
 import { useEffect, useState } from "react";
 
-// Interactive, no-signup demo: calls the LIVE API from the browser (CORS * allows it)
-// and renders real results with their trust + freshness — the two things that make Khoj
-// different. It also shows the exact request URL + curl, so the explorer doubles as docs.
+// Interactive, no-signup demo: calls the LIVE API from the browser and renders real
+// results with trust + freshness. Two modes make the graph's range obvious:
+//   • Cities  — physical places in a city (monuments, markets, street food…)
+//   • Culture — festivals, dance/art, cuisines, dishes, sports across India
+// It also shows the exact request + curl, so the explorer doubles as docs.
 
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE ?? "https://khoj-ibli.onrender.com";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "https://khoj-ibli.onrender.com";
+const MIN_SOURCES = 2; // showcase only corroborated entities — the whole point of Khoj
 
-// Well-covered city slugs (verified to return corroborated results). Note: it's
-// `bangalore`, not `bengaluru`, in the graph.
-const CHIPS = ["delhi", "jaipur", "varanasi", "hampi", "mysore", "udaipur", "leh", "kutch", "pondicherry", "goa"];
-const MIN_SOURCES = 2; // showcase only corroborated places — the whole point of Khoj
+const CITY_CHIPS = ["delhi", "jaipur", "varanasi", "hampi", "mysore", "udaipur", "leh", "kutch"];
+const THEME_CHIPS = [
+  { key: "cultural", label: "Arts & culture" },
+  { key: "festival", label: "Festivals" },
+  { key: "cuisine", label: "Cuisines" },
+  { key: "dish", label: "Dishes" },
+  { key: "sport", label: "Sports" },
+];
+
+// Friendly label for what a result IS (so "Butter Chicken" reads as a Dish, not a
+// mystery "Restaurant", and a festival reads as a Festival).
+const TYPE_LABELS: Record<string, string> = {
+  festival: "Festival",
+  cuisine: "Cuisine",
+  dish: "Dish",
+  sport: "Sport",
+  craft: "Craft",
+  performing_art: "Dance",
+  art_form: "Art",
+  cultural: "Culture",
+  activity: "Activity",
+};
 
 type Trust = { sources: number; platforms: number; score: number };
 type Freshness = { label: string; age_days: number | null } | null;
 type Place = {
   slug: string;
   name: string;
+  entity_type: string;
   category: string | null;
   city: string;
   sources: number;
@@ -29,6 +50,11 @@ type Place = {
 
 const pretty = (s: string | null) =>
   (s ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+function typeLabel(p: Place): string {
+  if (p.entity_type === "poi") return pretty(p.category) || "Place";
+  return TYPE_LABELS[p.entity_type] ?? pretty(p.entity_type);
+}
 
 function FreshnessPill({ f }: { f: Freshness }) {
   if (!f || f.label === "unknown") return null;
@@ -52,8 +78,11 @@ function PlaceCard({ p }: { p: Place }) {
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="truncate font-medium text-ink">{p.name}</div>
-          <div className="text-xs text-ink-mute">
-            {pretty(p.category) || "Place"} · {p.city}
+          <div className="mt-0.5 flex items-center gap-1.5">
+            <span className="rounded border border-line px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-ink-soft">
+              {typeLabel(p)}
+            </span>
+            <span className="truncate text-xs text-ink-mute">{p.city}</span>
           </div>
         </div>
         <FreshnessPill f={p.freshness} />
@@ -76,8 +105,11 @@ function PlaceCard({ p }: { p: Place }) {
 }
 
 export default function LiveExplorer() {
+  const [mode, setMode] = useState<"city" | "theme">("city");
   const [city, setCity] = useState("delhi");
   const [input, setInput] = useState("delhi");
+  const [theme, setTheme] = useState("cultural");
+
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +117,10 @@ export default function LiveExplorer() {
   const [raw, setRaw] = useState<unknown>(null);
   const [copied, setCopied] = useState(false);
 
-  const path = `/v1/places?city=${encodeURIComponent(city)}&sort=trust&min_sources=${MIN_SOURCES}&limit=6`;
+  const path =
+    mode === "city"
+      ? `/v1/places?city=${encodeURIComponent(city)}&sort=trust&min_sources=${MIN_SOURCES}&limit=6`
+      : `/v1/places?type=${encodeURIComponent(theme)}&sort=trust&min_sources=${MIN_SOURCES}&limit=6`;
   const url = API_BASE + path;
   const curl = `curl "${url}"`;
 
@@ -116,52 +151,89 @@ export default function LiveExplorer() {
         </span>
       </div>
       <h3 className="font-display text-lg font-semibold text-ink">
-        Try it — explore any Indian city
+        Try it — explore India’s places & culture
       </h3>
       <p className="mb-4 text-xs text-ink-soft">
-        Showing places with <span className="font-medium text-ink">{MIN_SOURCES}+ independent sources</span>, ranked by trust.
+        It’s more than places — festivals, dance, cuisines and sports too. Showing entities with{" "}
+        <span className="font-medium text-ink">{MIN_SOURCES}+ independent sources</span>, ranked by trust.
       </p>
 
-      {/* Query bar */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const v = input.trim().toLowerCase();
-          if (v) setCity(v);
-        }}
-        className="flex gap-2"
-      >
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="city, e.g. leh"
-          className="flex-1 rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-mute focus:border-ink focus:outline-none"
-        />
-        <button
-          type="submit"
-          className="shrink-0 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:opacity-90"
-        >
-          Explore
-        </button>
-      </form>
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {CHIPS.map((c) => (
+      {/* Mode toggle */}
+      <div className="mb-3 inline-flex rounded-lg border border-line p-0.5">
+        {(["city", "theme"] as const).map((m) => (
           <button
-            key={c}
-            onClick={() => {
-              setInput(c);
-              setCity(c);
-            }}
-            className={`rounded-full border px-2.5 py-1 text-xs capitalize transition ${
-              c === city
-                ? "border-vermilion bg-vermilion/10 text-vermilion"
-                : "border-line text-ink-soft hover:border-ink hover:text-ink"
+            key={m}
+            onClick={() => setMode(m)}
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+              mode === m ? "bg-ink text-paper" : "text-ink-soft hover:text-ink"
             }`}
           >
-            {c}
+            {m === "city" ? "By city" : "By theme"}
           </button>
         ))}
       </div>
+
+      {/* City mode: search + chips */}
+      {mode === "city" ? (
+        <>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const v = input.trim().toLowerCase();
+              if (v) setCity(v);
+            }}
+            className="flex gap-2"
+          >
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="city, e.g. leh"
+              className="flex-1 rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-ink-mute focus:border-ink focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="shrink-0 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:opacity-90"
+            >
+              Explore
+            </button>
+          </form>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {CITY_CHIPS.map((c) => (
+              <button
+                key={c}
+                onClick={() => {
+                  setInput(c);
+                  setCity(c);
+                }}
+                className={`rounded-full border px-2.5 py-1 text-xs capitalize transition ${
+                  c === city
+                    ? "border-vermilion bg-vermilion/10 text-vermilion"
+                    : "border-line text-ink-soft hover:border-ink hover:text-ink"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        /* Theme mode: cultural-type chips */
+        <div className="flex flex-wrap gap-1.5">
+          {THEME_CHIPS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTheme(t.key)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                t.key === theme
+                  ? "border-vermilion bg-vermilion/10 text-vermilion"
+                  : "border-line text-ink-soft hover:border-ink hover:text-ink"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* The request — the explorer doubles as docs */}
       <div className="mt-4 flex items-center gap-2">
@@ -199,7 +271,9 @@ export default function LiveExplorer() {
           </p>
         ) : places.length === 0 ? (
           <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-sm text-ink-mute">
-            No corroborated places for “{city}” yet. Try delhi, leh, kutch or varanasi.
+            {mode === "city"
+              ? `No corroborated places for “${city}” yet. Try delhi, leh, kutch or varanasi.`
+              : "Nothing here yet — try another theme."}
           </p>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">

@@ -59,10 +59,13 @@ tiny **route handler** (`route.ts`, not a React page) that returns a standalone 
 The API's own `/swagger/` UI stays up as the raw/backup view; the portal is the primary surface.
 
 **The landing is interactive.** `/developers` shows live graph stats (fetched from `/v1/stats`) and
-an **in-page explorer** (`_components/LiveExplorer.tsx`, client) that calls the real API as you type
-a city and renders each result's **trust** (meter + source/platform counts) and **freshness** (pill)
-— the two signals that make Khoj different — plus the exact request URL + copyable `curl`. It needs
-no signup, so a developer sees the data (and the API shape) before committing. The docs intro itself
+an **in-page explorer** (`_components/LiveExplorer.tsx`, client) that calls the real API with no
+signup. It has **two modes** so the graph's range is obvious: **By city** (`?city=`) for physical
+places, and **By theme** (`?type=cultural|festival|cuisine|dish|sport`) to surface the cultural
+breadth — Kathakali, Holi, Kalaripayattu, etc. Each card carries a **type badge** (so "Butter
+Chicken" reads as a Dish, a festival as a Festival), the **trust** meter (source/platform counts)
+and a **freshness** pill, plus the exact request URL + copyable `curl`. Both modes filter to
+`min_sources=2`, so only corroborated entities show. The docs intro itself
 is authored in the Go spec's `info.description` (markdown: auth, plans/rate-limits, trust/freshness,
 pagination), so Scalar renders a real getting-started, not just an endpoint dump.
 
