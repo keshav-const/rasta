@@ -1,0 +1,15 @@
+# India-wide blogs — verified reachable, 2026-11-12. Coorg, Gangtok, Ajanta/Ellora, Junagadh.
+# Run: bash scripts/run_batch.sh blog scripts/batches/india_wide_blogs.txt
+
+https://www.inmysore.com/travel-guide/coorg-travel-guide
+https://www.thrillophilia.com/places-to-visit-in-coorg
+https://pickyourtrail.com/blog/places-to-visit-in-coorg
+https://discoverwithdheeraj.com/gangtok-weekend-trip-guide/
+https://vargiskhan.com/log/gangtok-travel-guide-itinerary/
+https://hurryupcabs.com/explore/india-travel-guides/places-to-visit-in-gangtok
+https://realitytoursandtravel.com/ajanta-and-ellora-caves-travel-guide/
+https://breathedreamgo.com/ellora-and-ajanta-caves-surprisingly-stupendous/
+https://ramaarya.blog/2019/05/17/the-essential-travel-guide-to-aurangabad/
+https://www.treksandtrails.org/blog/quench-your-thirst-for-art-with-an-ajanta-ellora-tour
+https://www.tourmyindia.com/states/gujarat/junagadh.html
+https://www.savaari.com/blog/web-stories/coorg-travel-guide/

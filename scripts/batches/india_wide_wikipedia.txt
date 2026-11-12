@@ -1,0 +1,111 @@
+# India-wide batch (Wikipedia) — cities, states & UTs still missing/thin. 2026-11-12.
+# Run: bash scripts/run_batch.sh wikipedia scripts/batches/india_wide_wikipedia.txt
+
+# --- Kerala (Thekkady, Kumarakom, Alleppey, Thiruvananthapuram) ---
+Periyar National Park
+Kumarakom
+Alappuzha
+Padmanabhaswamy Temple
+Napier Museum
+Kovalam
+
+# --- Karnataka (Coorg, Mangalore) ---
+Madikeri
+Abbey Falls
+Raja's Seat
+Kadri Manjunath Temple
+Panambur Beach
+
+# --- Maharashtra (Ajanta/Ellora, Lonavala, Nagpur) ---
+Ajanta Caves
+Ellora Caves
+Karla Caves
+Bhaja Caves
+Lonavla
+Deekshabhoomi
+
+# --- Andhra / Telangana (Araku, Vijayawada, Warangal) ---
+Araku Valley
+Kanaka Durga Temple
+Undavalli Caves
+Warangal Fort
+Thousand Pillar Temple
+Ramappa Temple
+
+# --- Odisha (Chilika) ---
+Chilika Lake
+
+# --- West Bengal (Shantiniketan, Kalimpong) ---
+Visva-Bharati University
+Kalimpong
+
+# --- Rajasthan (Bundi, Alwar) ---
+Taragarh Fort, Bundi
+Bundi Palace
+Sariska Tiger Reserve
+Bala Quila
+
+# --- Gujarat (Vadodara, Junagadh, Palitana) + Diu/Daman (UTs) ---
+Laxmi Vilas Palace, Vadodara
+Girnar
+Uparkot Fort
+Mahabat Maqbara
+Palitana temples
+Diu Fort
+Nagoa Beach
+Moti Daman Fort
+
+# --- Lakshadweep (UT) ---
+Agatti Island
+Kavaratti
+Bangaram
+
+# --- Uttar Pradesh (Prayagraj, Jhansi) ---
+Triveni Sangam
+Allahabad Fort
+Khusro Bagh
+Jhansi Fort
+
+# --- Bihar (Patna, Rajgir, Gaya) ---
+Golghar
+Takht Sri Patna Sahib
+Vishwa Shanti Stupa, Rajgir
+Vishnupad Temple
+
+# --- Sikkim (Gangtok, Pelling) ---
+Rumtek Monastery
+Tsomgo Lake
+Nathula
+Pemayangtse Monastery
+Khecheopalri Lake
+
+# --- Northeast capitals (Imphal, Itanagar, Kohima) ---
+Kangla Fort
+Loktak Lake
+Ima Keithel
+Ita Fort
+Kohima War Cemetery
+
+# --- Haryana (Kurukshetra) ---
+Brahma Sarovar
+Jyotisar
+
+# --- Himachal (Kullu, Kinnaur/Kalpa) ---
+Bijli Mahadev
+Kinnaur Kailash
+Kalpa, Himachal Pradesh
+
+# --- Uttarakhand (Almora, Ranikhet, Dehradun) ---
+Jageshwar
+Kasar Devi
+Jhula Devi Temple
+Robber's Cave
+Tapkeshwar Temple
+
+# --- Punjab (Patiala) ---
+Qila Mubarak
+Sheesh Mahal, Patiala
+
+# --- Tamil Nadu (Mahabalipuram depth) ---
+Shore Temple
+Pancha Rathas
