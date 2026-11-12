@@ -10,7 +10,9 @@ type Stats = { places: number; cities: number; sources: number; claims: number }
 
 async function getStats(): Promise<Stats | null> {
   try {
-    const r = await fetch(`${API_BASE}/v1/stats`, { next: { revalidate: 300 } });
+    // revalidate often so the landing reflects fresh ingestion within ~a minute (the API
+    // itself caches /v1/stats ~60s, so this stays cheap).
+    const r = await fetch(`${API_BASE}/v1/stats`, { next: { revalidate: 60 } });
     if (!r.ok) return null;
     const j = await r.json();
     return j.data as Stats;
