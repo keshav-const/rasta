@@ -11,7 +11,7 @@ const API_BASE =
 
 // Well-covered city slugs (verified to return corroborated results). Note: it's
 // `bangalore`, not `bengaluru`, in the graph.
-const CHIPS = ["delhi", "leh", "varanasi", "kutch", "bangalore", "guwahati", "mumbai", "goa"];
+const CHIPS = ["delhi", "jaipur", "varanasi", "hampi", "mysore", "udaipur", "leh", "kutch", "pondicherry", "goa"];
 const MIN_SOURCES = 2; // showcase only corroborated places — the whole point of Khoj
 
 type Trust = { sources: number; platforms: number; score: number };
