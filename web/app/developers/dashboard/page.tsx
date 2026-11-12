@@ -9,8 +9,11 @@ import {
   USAGE_WINDOW_DAYS,
   type UsageRow,
 } from "@/lib/usage";
+import { getUserPlan } from "@/lib/billing";
+import { razorpayConfigured } from "@/lib/razorpay";
 import { logout } from "../actions";
 import KeyManager, { type KeyRow } from "./_components/KeyManager";
+import BillingPanel from "./_components/BillingPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +55,7 @@ export default async function DeveloperDashboard() {
   }
   const usage = aggregateUsage(usageRows);
   const summary = summarize(usage);
+  const [currentPlan, billingReady] = [await getUserPlan(session.sub), razorpayConfigured()];
 
   return (
     <div className="min-h-screen bg-paper px-6 py-12">
@@ -92,7 +96,10 @@ export default async function DeveloperDashboard() {
           Signed in as <span className="font-medium text-ink">{session.email}</span>.
         </p>
 
-        <KeyManager keys={keys} usage={usage} summary={summary} />
+        <div className="space-y-6">
+          <BillingPanel currentPlan={currentPlan} billingConfigured={billingReady} email={session.email} />
+          <KeyManager keys={keys} usage={usage} summary={summary} />
+        </div>
       </div>
     </div>
   );

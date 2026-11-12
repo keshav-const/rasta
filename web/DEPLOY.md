@@ -24,6 +24,23 @@ folder goes to Vercel.
 `ADMIN_PASSWORD` is therefore not needed either (nothing to protect). `NEXT_PUBLIC_SUPABASE_URL`
 is unused by the code — skip it.
 
+### Billing (Razorpay) — optional until you add keys
+The paywall is **inert until these are set** — the dashboard shows "Billing coming soon"
+and nothing breaks. Add them (test keys first, then live) to turn it on:
+
+| Var | Note |
+|---|---|
+| `RAZORPAY_KEY_ID` | Key id (test `rzp_test_…` → live `rzp_live_…`) |
+| `RAZORPAY_KEY_SECRET` | Key secret — server-only |
+| `RAZORPAY_WEBHOOK_SECRET` | The secret you set on the webhook in the Razorpay dashboard |
+| `RAZORPAY_PLAN_ID_PRO` | The Razorpay **Plan** id for Pro (`plan_…`), created in the dashboard |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Same key id, exposed to Checkout.js in the browser |
+| `NEXT_PUBLIC_RAZORPAY_PRO_PRICE` | (optional) display only, e.g. `₹999 / mo` |
+
+**Razorpay dashboard setup:** create a recurring **Plan** (→ `RAZORPAY_PLAN_ID_PRO`), then a
+**Webhook** pointed at `https://<app>/api/razorpay/webhook` with secret = `RAZORPAY_WEBHOOK_SECRET`
+and the `subscription.*` events enabled. Flipping test→live is just swapping these keys.
+
 ## What ships
 All of `web/` deploys as one app. Public routes:
 - `/` + `/poi/[slug]` — consumer site (dogfoods the live API)

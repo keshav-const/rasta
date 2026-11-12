@@ -165,6 +165,30 @@ accounting (that tightens in M4). **Why UTC in both places?** `lib/usage.ts` com
 with `toISOString()` (UTC); the API buckets with `(now() at time zone 'utc')::date` — so a request
 and its dashboard bucket never land on different calendar days because of a server timezone.
 
+## 4b. Billing & the paywall (M4 — Razorpay)
+
+Plans (Free/Pro/Enterprise) are sold here; the Go API enforces them **unchanged**. The trick:
+the API already reads a key's `plan` column fresh on every request (no cache), so **flipping a
+user to Pro is just stamping `api_keys.plan='pro'`** for their keys — no API deploy, effective on
+the next call.
+
+- **`subscriptions` table** = source of truth + audit (`user_id`, `plan`, `status`,
+  `razorpay_subscription_id`, `current_period_end`). A user's effective plan = their latest
+  *active* subscription's plan, else `free` (`lib/billing.ts getUserPlan`).
+- **Upgrade** (`billing/actions.ts startUpgrade`): creates a Razorpay **subscription** (REST,
+  `lib/razorpay.ts`), records it against the user (`notes.user_id` ties them together), and returns
+  what **Checkout.js** needs. `BillingPanel` (client) opens checkout. The browser flow only *starts*
+  the subscription — it never grants the plan.
+- **The webhook is the only thing that grants a plan** (`app/api/razorpay/webhook/route.ts`): it
+  verifies `X-Razorpay-Signature` = HMAC-SHA256(raw body, webhook secret) — so a client can't forge
+  an upgrade — then `applySubscriptionEvent` updates the row and stamps the user's keys (`pro` on
+  activate/charge, `free` on cancel/complete). `createKey` also reads `getUserPlan`, so a Pro user's
+  new keys are born Pro.
+- **Inert until configured**: `razorpayConfigured()` gates the UI and actions, so before keys are
+  added the dashboard just shows "Billing coming soon" and nothing errors. Test→live = swap keys.
+- **Why no Go change**: enforcement is already `plan`-column-driven; billing is a control-plane
+  concern, and the control plane (Next) owns the write. See API ADR-021.
+
 ### Security: a Server Action is a public POST endpoint
 
 This is the subtle, important part. Rendering a form only on an authenticated page is **not** a
@@ -197,6 +221,12 @@ web/
     login/ signup/ page.tsx         # auth forms
     dashboard/page.tsx              # protected; reads the user's keys + usage → KeyManager
     dashboard/_components/KeyManager.tsx   # client: usage summary, create form, reveal, per-key usage + revoke
+    dashboard/_components/BillingPanel.tsx # client: plan cards, Razorpay Checkout upgrade, cancel
+    billing/actions.ts              # startUpgrade / cancelPro (Server Actions)
+  app/api/razorpay/webhook/route.ts # signed webhook — the only path that grants/revokes a plan
+  lib/plans.ts                      # plan catalog (display mirror of the API's enforced limits)
+  lib/razorpay.ts                   # Razorpay REST client + webhook signature verify (no SDK)
+  lib/billing.ts                    # getUserPlan / applyPlanToKeys / applySubscriptionEvent
 ```
 
 ---

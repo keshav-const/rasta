@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase";
 import { mintApiKey } from "@/lib/apikey";
+import { getUserPlan } from "@/lib/billing";
 import {
   supabaseAuthClient,
   createDevSessionToken,
@@ -101,16 +102,17 @@ export async function createKey(
   }
 
   const { raw, hash, prefix } = await mintApiKey();
-  // Self-serve keys are 'free' plan. Paid plans attach to the ACCOUNT (not the key)
-  // in M4 via Razorpay; keys then inherit the account's plan. Storing only the hash
-  // means the raw key below is the one and only time it is ever visible.
+  // Keys inherit the ACCOUNT's current plan (Pro if the user has an active subscription,
+  // else Free) — so a Pro user's new keys get Pro limits immediately. Storing only the
+  // hash means the raw key below is the one and only time it is ever visible.
+  const plan = await getUserPlan(session.sub);
   const { error } = await admin.from("api_keys").insert({
     user_id: session.sub,
     owner_email: session.email,
     name,
     key_hash: hash,
     key_prefix: prefix,
-    plan: "free",
+    plan,
     scopes: [],
   });
   if (error) return { ok: false, error: "Could not create key. Try again." };
