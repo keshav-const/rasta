@@ -1,0 +1,111 @@
+# Round-3 "frontier" Wikipedia batch — fills genuine geographic + cultural gaps
+# confirmed absent from the graph on 2026-11-13 (see scripts/batches/README notes):
+# under-represented states/UTs, tier-2/3 cities across many states, and a handful of
+# festivals/dances/crafts/sports/cuisines not yet covered. Ingesters dedup by source,
+# so any accidental overlap with existing pages is skipped automatically.
+# Run:  bash scripts/run_batch.sh wikipedia scripts/batches/frontier_wikipedia.txt
+
+# --- states / UTs under-represented at the region level ---
+Assam
+Culture of Assam
+West Bengal
+Culture of West Bengal
+Daman, Diu
+Silvassa
+Dadra and Nagar Haveli and Daman and Diu
+Mahé, Puducherry
+Yanam
+Karaikal
+
+# --- Northeast (deepen breadth) ---
+Dimapur
+Culture of Nagaland
+Culture of Meghalaya
+Culture of Manipur
+Ukhrul
+Mokokchung
+
+# --- Uttar Pradesh tier-2 cities ---
+Meerut
+Bareilly
+Moradabad
+Aligarh
+Gorakhpur
+Firozabad
+Saharanpur
+Jhansi
+
+# --- Rajasthan tier-2 ---
+Sikar
+Bharatpur
+Jhunjhunu
+Mandawa
+
+# --- Madhya Pradesh / Chhattisgarh ---
+Jabalpur
+Bilaspur, Chhattisgarh
+Durg
+Dhamtari
+
+# --- Jharkhand / Odisha / West Bengal cities ---
+Jamshedpur
+Rourkela
+Howrah
+Asansol
+Berhampur, Odisha
+
+# --- Maharashtra tier-2 ---
+Solapur
+Amravati
+Jalgaon
+Nanded
+Latur
+Akola
+
+# --- Andhra Pradesh / Telangana ---
+Nellore
+Kurnool
+Nizamabad
+Kadapa
+
+# --- festivals not yet covered ---
+Bihu
+Bonalu
+Bathukamma
+Teej
+Gangaur
+Thrissur Pooram
+Nuakhai
+Wangala
+Losar
+Chapchar Kut
+
+# --- dance & performing arts ---
+Bihu dance
+Cheraw dance
+Bagurumba
+Dollu Kunitha
+Padayani
+Bhavai (dance)
+
+# --- crafts / textiles ---
+Kanchipuram silk sari
+Sambalpuri sari
+Muga silk
+Dhokra
+Kondapalli Toys
+Thanjavur painting
+
+# --- cuisines (regional) ---
+Assamese cuisine
+Bengali cuisine
+Chhattisgarhi cuisine
+Konkani cuisine
+Naga cuisine
+
+# --- traditional sports / martial arts ---
+Kila Raipur Sports Festival
+Inbuan wrestling
+Kho kho
+Vallam kali
+Insuknawr

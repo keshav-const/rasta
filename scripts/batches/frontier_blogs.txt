@@ -1,0 +1,32 @@
+# Round-3 "frontier" blog batch — tier-2/3 cities + UT gaps + festival pages.
+# All URLs curl-verified 200 on 2026-11-13. Ingester dedups by source URL.
+# Run:  bash scripts/run_batch.sh blog scripts/batches/frontier_blogs.txt
+
+# --- tier-2/3 cities (city guides) ---
+https://www.holidify.com/places/jabalpur/
+https://www.holidify.com/places/jamshedpur/
+https://www.holidify.com/places/mandawa/
+https://www.holidify.com/places/amravati/
+https://www.holidify.com/places/nanded/
+https://www.holidify.com/places/nellore/
+https://www.holidify.com/places/kurnool/
+https://www.holidify.com/places/meerut/
+https://www.holidify.com/places/aligarh/
+https://www.holidify.com/places/bharatpur/
+https://www.holidify.com/places/bilaspur/
+https://www.holidify.com/places/rourkela/
+https://www.holidify.com/places/howrah/
+https://www.holidify.com/places/majuli/
+
+# --- union-territory gaps (Daman & Diu / DNH) ---
+https://www.holidify.com/places/silvassa/
+https://www.holidify.com/places/daman/
+https://www.holidify.com/places/diu/
+
+# --- Northeast ---
+https://www.holidify.com/places/dimapur/
+
+# --- festivals ---
+https://www.tourmyindia.com/states/assam/bihu-festival.html
+https://www.tourmyindia.com/states/kerala/thrissur-pooram.html
+https://www.tourmyindia.com/states/west-bengal/durga-puja.html

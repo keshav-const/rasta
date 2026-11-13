@@ -1,0 +1,56 @@
+# Round-2 Wikipedia batch — nature/wildlife, hill stations, lakes, pilgrimage
+# circuits, music traditions and tribal culture. Broadens the graph beyond the
+# metros and the arts/crafts already covered.
+# Run:  bash scripts/run_batch.sh wikipedia scripts/batches/nature_pilgrimage_wikipedia.txt
+
+# --- national parks / wildlife ---
+Kaziranga National Park
+Ranthambore National Park
+Jim Corbett National Park
+Bandhavgarh National Park
+Gir National Park
+Periyar National Park
+Sundarbans National Park
+Hemis National Park
+
+# --- hill stations / nature ---
+Munnar
+Ziro
+Spiti Valley
+Tawang
+Coorg
+Chikmagalur
+Gulmarg
+Dzukou Valley
+Loktak Lake
+Dal Lake
+
+# --- pilgrimage / sacred sites ---
+Kedarnath Temple
+Badrinath Temple
+Rameswaram
+Tirumala Venkateswara Temple
+Vaishno Devi
+Jagannath Temple, Puri
+Somnath temple
+Amarnath Temple
+Char Dham
+Golden Temple
+
+# --- music traditions & instruments ---
+Hindustani classical music
+Carnatic music
+Baul
+Sitar
+Tabla
+Sarod
+Thumri
+Qawwali
+
+# --- tribal & regional culture ---
+Toda people
+Gond people
+Santhal people
+Apatani people
+Bishnoi
+Warli

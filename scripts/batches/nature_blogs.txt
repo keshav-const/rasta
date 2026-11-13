@@ -1,0 +1,3 @@
+# Round-2 blogs — wildlife/nature guides (verified reachable 2026-11-10).
+# Run:  bash scripts/run_batch.sh blog scripts/batches/nature_blogs.txt
+https://www.hidmc.com/blog-posts/explore-indias-wild-side-a-tourist-friendly-guide-to-wildlife-and-safari-adventures

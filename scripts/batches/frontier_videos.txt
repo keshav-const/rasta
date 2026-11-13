@@ -1,0 +1,16 @@
+# Round-3 "frontier" video batch — YouTube, curated via yt-dlp ytsearch on 2026-11-13.
+# Gap themes: NE/eastern festivals, UT travel (Daman & Diu), tier-2 cities, crafts,
+# regional cuisines, traditional sports. run.py dedups already-processed videos.
+# Run:  bash scripts/run_batch.sh video scripts/batches/frontier_videos.txt
+https://youtu.be/fsJ3RS3V5K8
+https://youtu.be/1VB6hMZ7n5Q
+https://youtu.be/agIG5HjH_oM
+https://youtu.be/hvts3A3DtWs
+https://youtu.be/HWZhGfyQoCE
+https://youtu.be/8eAmbANFmoA
+https://youtu.be/li36b7QjCi8
+https://youtu.be/qVjXWvXGabY
+https://youtu.be/d0Ub_gOq8xo
+https://youtu.be/eUP0EOqcB-U
+https://youtu.be/QIjNZHJ-dYg
+https://youtu.be/p5asb6PhgiM

@@ -1,0 +1,19 @@
+# Round-3 "frontier" podcast batch — NEW shows (not re-runs of earlier feeds),
+# weighted to Northeast + heritage gaps. Transcribed LOCALLY with faster-whisper
+# (no API cost). RSS feeds verified 200 + valid channel on 2026-11-13.
+# Run:  PODCAST_LIMIT=1 bash scripts/run_batch.sh podcast scripts/batches/frontier_podcasts.txt
+#
+# NOTE: each episode is a full CPU transcription — slow. Keep PODCAST_LIMIT=1 and run
+# this in the background, separate from the text batches.
+
+# Culture Of NorthEast India — tribes, festivals, traditions of the NE.
+https://anchor.fm/s/1d87388c/podcast/rss
+
+# Zubaan Talkies: Food Cultures of the Northeast India — regional cuisines.
+https://feeds.transistor.fm/zubaan-talkies-food-cultures-of-the-northeast-india
+
+# Heritage India Podcast — monuments, history, heritage sites.
+https://feeds.megaphone.fm/ISP9127950437
+
+# The BharatDesha Audio Companion — India travel + heritage, place by place.
+https://media.rss.com/the-bharatdesha-audio-companion-india-travel-heritage/feed.xml
