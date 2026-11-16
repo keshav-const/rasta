@@ -1,0 +1,18 @@
+# Round-4 "frontier2" video batch — YouTube, curated via yt-dlp ytsearch 2026-11-16.
+# Themes: folk theatre, tribal/folk painting, classical & folk dance, weaves, martial
+# arts, regional festivals & folk music. run.py dedups already-processed videos.
+# Run:  bash scripts/run_batch.sh video scripts/batches/frontier2_videos.txt
+https://youtu.be/eUtw1plJyF0
+https://youtu.be/oHJ6hP4AwNc
+https://youtu.be/hF3NYeX68H0
+https://youtu.be/03aq4zXO-8Q
+https://youtu.be/F_4lAQZ34gs
+https://youtu.be/AaFoB46BA4M
+https://youtu.be/PHtWd60hPAM
+https://youtu.be/rdCvax2wjAo
+https://youtu.be/AEwL6iGDqfs
+https://youtu.be/AqJuyzcZsN8
+https://youtu.be/31tk4VlB3z4
+https://youtu.be/1RKum2sOumw
+https://youtu.be/NDrQFGE_tWA
+https://youtu.be/2t9TboA8dpc

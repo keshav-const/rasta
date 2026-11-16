@@ -1,0 +1,135 @@
+# Round-4 "frontier2" Wikipedia batch — art forms, folk theatre, dance, crafts,
+# music, traditional sports and tier-2/3 places confirmed ABSENT on 2026-11-16.
+# Every region represented. Ingesters dedup by source, so any overlap is skipped.
+# Run:  bash scripts/run_batch.sh wikipedia scripts/batches/frontier2_wikipedia.txt
+
+# --- folk & classical theatre ---
+Therukoothu
+Bhand Pather
+Burra Katha
+Villu Paatu
+Daskathia
+Bhagavata Mela
+Gotipua
+Kariyala
+Pala (singing)
+Ankia Naat
+
+# --- dance forms (region-spread) ---
+Rouf
+Dalkhai
+Hojagiri dance
+Bardo Chham
+Nati (dance)
+Karakattam
+Perini Shivatandavam
+Dhimsa
+Charkula dance
+Lambadi
+Ghumura dance
+Gaur Maria dance
+
+# --- painting & visual art ---
+Gond art
+Cheriyal scroll painting
+Patua
+Manjusha Art
+Saura painting
+Sanjhi
+Basohli painting
+Kaavad
+Mysore painting
+Pichwai
+
+# --- crafts & textiles ---
+Banarasi sari
+Kullu shawl
+Kasuti
+Thewa
+Meenakari
+Sikki grass
+Papier-mâché (Kashmir)
+Sozni
+Kantha
+Pochampally Saree
+Chikan (embroidery)
+Zardozi
+
+# --- folk music ---
+Rabindra Sangeet
+Manganiar
+Powada
+Pandavani
+Sufi music in India
+
+# --- traditional sports / martial arts ---
+Huyen langlon
+Mukna
+Yubi lakpi
+Mardani Khel
+Boat race
+
+# --- festivals not yet covered (every region) ---
+Chhath Puja
+Gudi Padwa
+Ugadi
+Vishu
+Lohri
+Sarhul
+Madai festival
+Saga Dawa
+Me-Dam-Me-Phi
+Hemis festival
+
+# --- north Indian towns ---
+Panipat
+Rohtak
+Hisar
+Shahjahanpur
+Rae Bareli
+Banswara
+Dungarpur
+
+# --- central India ---
+Rewa
+Satna
+Chhindwara
+Ratlam
+Korba
+Ambikapur
+
+# --- western India ---
+Rajkot
+Jamnagar
+Bhavnagar
+Porbandar
+Sangli
+
+# --- eastern India ---
+Purnia
+Hazaribagh
+Balasore
+Baripada
+Malda
+Murshidabad
+Bankura
+
+# --- southern India ---
+Tirunelveli
+Vellore
+Salem, Tamil Nadu
+Erode
+Rajahmundry
+Anantapur
+Karimnagar
+Khammam
+Belgaum
+Bijapur, Karnataka
+Palakkad
+Malappuram
+
+# --- northeast ---
+Churachandpur
+Pasighat
+Phek
+Silchar

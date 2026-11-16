@@ -1,0 +1,18 @@
+# Round-4 "frontier2" podcast batch — arts/crafts-weighted. Two NEW art shows plus two
+# proven feeds (fresh episodes since round 3). Local faster-whisper, no API cost.
+# Feeds verified 200 + valid on 2026-11-16.
+# Run:  PODCAST_LIMIT=2 bash scripts/run_batch.sh podcast scripts/batches/frontier2_podcasts.txt
+#
+# NOTE: each episode is a full CPU transcription — slow. Run in the background.
+
+# Artyverse — exploring the Indian art scene (NEW).
+https://feeds.hubhopper.com/f266d0dbb02d2c6229c5d46a1dfe8590.rss
+
+# Madhubani Art: A Culture of Indian Tradition (NEW).
+https://feeds.hubhopper.com/0e5a3c74ea747e08d678d671fc078085.rss
+
+# Culture Of NorthEast India — fresh episodes.
+https://anchor.fm/s/1d87388c/podcast/rss
+
+# Heritage India Podcast — monuments, history, heritage sites (fresh episodes).
+https://feeds.megaphone.fm/ISP9127950437

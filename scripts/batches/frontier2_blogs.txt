@@ -1,0 +1,42 @@
+# Round-4 "frontier2" blog batch — tier-2/3 city guides across every region + a couple
+# of art/culture pages. All URLs curl-verified 200 on 2026-11-16. Dedup by source URL.
+# Run:  bash scripts/run_batch.sh blog scripts/batches/frontier2_blogs.txt
+
+# --- western India ---
+https://www.holidify.com/places/rajkot/
+https://www.holidify.com/places/bhavnagar/
+https://www.holidify.com/places/porbandar/
+https://www.holidify.com/places/satna/
+
+# --- southern India ---
+https://www.holidify.com/places/vellore/
+https://www.holidify.com/places/salem/
+https://www.holidify.com/places/tirunelveli/
+https://www.holidify.com/places/palakkad/
+https://www.holidify.com/places/malappuram/
+https://www.holidify.com/places/belgaum/
+https://www.holidify.com/places/bijapur/
+https://www.holidify.com/places/anantapur/
+https://www.holidify.com/places/khammam/
+
+# --- central India ---
+https://www.holidify.com/places/chhindwara/
+https://www.holidify.com/places/korba/
+
+# --- northern India ---
+https://www.holidify.com/places/panipat/
+https://www.holidify.com/places/rohtak/
+
+# --- eastern India ---
+https://www.holidify.com/places/hazaribagh/
+https://www.holidify.com/places/malda/
+https://www.holidify.com/places/murshidabad/
+https://www.holidify.com/places/bankura/
+
+# --- northeast ---
+https://www.holidify.com/places/silchar/
+https://www.holidify.com/places/pasighat/
+
+# --- art & festival features ---
+https://www.tourmyindia.com/states/bihar/chhath-puja.html
+https://www.caleidoscope.in/art-culture/gond-art
