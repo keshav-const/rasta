@@ -65,9 +65,22 @@ places, and **By theme** (`?type=cultural|festival|cuisine|dish|sport`) to surfa
 breadth — Kathakali, Holi, Kalaripayattu, etc. Each card carries a **type badge** (so "Butter
 Chicken" reads as a Dish, a festival as a Festival), the **trust** meter (source/platform counts)
 and a **freshness** pill, plus the exact request URL + copyable `curl`. Both modes filter to
-`min_sources=2`, so only corroborated entities show. The docs intro itself
+`min_sources=2`, so only corroborated entities show. Explorer cards also render a **`📍 mapped`
+chip** (with the coordinate in its tooltip) whenever the entity is geocoded, surfacing the geo
+capability live. The docs intro itself
 is authored in the Go spec's `info.description` (markdown: auth, plans/rate-limits, trust/freshness,
 pagination), so Scalar renders a real getting-started, not just an endpoint dump.
+
+**Use-case reel + capability surface.** Below the explorer, `_components/UseCases.tsx` (client) is a
+self-playing reel of **five real product integrations** — a culture recommender (TasteTrail/Qloo
+framing), a geocoded map of trusted POIs, LLM/RAG grounding via `/v1/places/{slug}` evidence, a
+culture-discovery browser, and a corroboration/trust filter. Each slide types out the actual request,
+shows a representative result (ranked rows / map pins / cited answer / type chips), and names what you
+ship; it auto-advances (7s, pause-on-hover, tab/dot navigation) and needs no external video assets. The
+landing then lists the **full capability surface** (`CAPABILITIES` in `page.tsx`) — provenance,
+freshness, cultural graph, **geo+maps (badged "New")**, fuzzy search, receipts, taxonomy, keyset
+pagination, keys/plans/rate-limits, ETag caching, OpenAPI, the response envelope — so a developer sees
+everything the live API offers today. Facts/counts here are kept in sync with `/v1/stats`.
 
 ---
 
@@ -217,8 +230,9 @@ web/
     apikey.ts       # mintApiKey() — the khoj_ key format (MUST match Go)
     usage.ts        # pure: aggregate api_usage rows → per-key totals + 14-day sparkline
   app/developers/
-    page.tsx                        # landing — front door: live stats + interactive explorer + CTAs
-    _components/LiveExplorer.tsx    # client: calls the live API, renders trust/freshness, shows curl
+    page.tsx                        # landing — live stats + explorer + use-case reel + capability grid + CTAs
+    _components/LiveExplorer.tsx    # client: calls the live API, renders trust/freshness/📍mapped, shows curl
+    _components/UseCases.tsx        # client: self-playing reel of 5 real product integrations (no video assets)
     docs/route.ts                   # API reference: standalone HTML loading Scalar on the live spec
     actions.ts                      # signup/login/logout + createKey/revokeKey (Server Actions)
     login/ signup/ page.tsx         # auth forms

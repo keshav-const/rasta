@@ -42,6 +42,8 @@ type Place = {
   entity_type: string;
   category: string | null;
   city: string;
+  lat: number | null;
+  lng: number | null;
   sources: number;
   score: number;
   trust: Trust;
@@ -83,6 +85,14 @@ function PlaceCard({ p }: { p: Place }) {
               {typeLabel(p)}
             </span>
             <span className="truncate text-xs text-ink-mute">{p.city}</span>
+            {p.lat != null && p.lng != null && (
+              <span
+                title={`${p.lat.toFixed(4)}, ${p.lng.toFixed(4)} — geocoded`}
+                className="shrink-0 rounded-full border border-vermilion/30 bg-vermilion/5 px-1.5 py-0.5 text-[9px] font-medium text-vermilion"
+              >
+                📍 mapped
+              </span>
+            )}
           </div>
         </div>
         <FreshnessPill f={p.freshness} />
