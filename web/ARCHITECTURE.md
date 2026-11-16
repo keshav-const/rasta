@@ -72,11 +72,14 @@ is authored in the Go spec's `info.description` (markdown: auth, plans/rate-limi
 pagination), so Scalar renders a real getting-started, not just an endpoint dump.
 
 **Use-case reel + capability surface.** Below the explorer, `_components/UseCases.tsx` (client) is a
-self-playing reel of **five real product integrations** — a culture recommender (TasteTrail/Qloo
-framing), a geocoded map of trusted POIs, LLM/RAG grounding via `/v1/places/{slug}` evidence, a
-culture-discovery browser, and a corroboration/trust filter. Each slide types out the actual request,
-shows a representative result (ranked rows / map pins / cited answer / type chips), and names what you
-ship; it auto-advances (7s, pause-on-hover, tab/dot navigation) and needs no external video assets. The
+self-playing reel of **five real product integrations**, each rendered as a short **animated demo
+clip** inside an app-window frame (traffic-light chrome, a faux URL, a "REC" dot and a video-style
+scrubber). The scenes are pure CSS/SVG keyframe motion — no video files: a recommender ranks cards
+with trust bars filling (TasteTrail/Qloo framing), a map drops geocoded pins near a point, a chatbot
+streams a cited answer (LLM/RAG grounding via `/v1/places/{slug}`), a discovery UI switches culture
+filters, and a trust layer rejects single-source claims with a strike-out. Each slide remounts so its
+animation replays; the reel auto-advances (9s, pause-on-hover, tab/dot nav) and honours
+`prefers-reduced-motion`. The
 landing then lists the **full capability surface** (`CAPABILITIES` in `page.tsx`) — provenance,
 freshness, cultural graph, **geo+maps (badged "New")**, fuzzy search, receipts, taxonomy, keyset
 pagination, keys/plans/rate-limits, ETag caching, OpenAPI, the response envelope — so a developer sees
