@@ -8,8 +8,9 @@ It started as an NCR (Delhi/Gurgaon) travel aggregator and has grown into an
 India-wide, multi-source **cultural graph**: not just *places*, but the art forms,
 crafts, folk festivals, dances and cuisines that are anchored to those places.
 
-> **Status:** data pipeline + graph are live and growing. A monetised Go REST API
-> over this graph is the next milestone (see [Roadmap](#roadmap)).
+> **Status:** data pipeline + graph are live and growing, and the monetised Go REST API
+> over this graph now ships — API-key auth + plans, Redis rate-limiting, a developer portal,
+> and a Razorpay paywall are all built (see [Roadmap](#roadmap)).
 
 ---
 
@@ -17,11 +18,12 @@ crafts, folk festivals, dances and cuisines that are anchored to those places.
 
 | metric | value |
 |---|---|
-| active entities | **~4,000** |
-| — cultural entities | **~800** (art forms, crafts, festivals, cuisines, traditions) |
-| destinations (cities + regions) | **~470** |
-| geocoded (physical places) | **~97%** |
-| source platforms | **4** — YouTube · Wikipedia/Wikivoyage · blogs · podcasts |
+| active entities | **8,136** |
+| — cultural entities | **~1,800** (art forms, crafts, festivals, cuisines, dances, folk sports, traditions) |
+| destinations (cities + regions) | **870** |
+| geocoded (physical places) | **~93%** |
+| sources | **1,454** across **4** platforms — Wikipedia 751 · YouTube 409 · blogs 267 · podcasts 27 |
+| sourced claims | **~10,000** |
 | state destinations w/ official tourist-visit stats | 24 |
 
 *(numbers are live — query the DB for exact counts)*
@@ -105,11 +107,12 @@ Recent work focused on making the consolidation flow fast and robust at scale:
   *per POI* (~7,400 round-trips). Scoring is pure computation, so it now fetches all
   POIs + evidence in two queries over one connection, scores in memory, and writes
   back with one batched update.
-- **Concurrent multi-provider geocoding — 86% → 97% coverage.** Free geocoders cap
+- **Concurrent multi-provider geocoding — ~93% coverage.** Free geocoders cap
   throughput and ban parallel hits to a single service, so `geocode_pois.py` runs
   **Photon · Nominatim · LocationIQ · Geoapify** concurrently (one worker each,
   throttled to its own limit), retries misses on a *different* provider, and marks
   permanent failures so they're never re-tried. Keyless out of the box; faster with keys.
+  Those lat/lng power the API's radius (`near`+`radius_km`) and bounding-box (`bbox`) map queries.
 - **Transcript pacing + hands-off auto-retry.** A global min-interval throttle keeps
   YouTube transcript pulls under the per-IP rate limit; `auto_retry_blocked.sh`
   recovers IP-blocked videos automatically, backing off during blocks.
@@ -133,13 +136,18 @@ Secrets live in a gitignored `.env` (DB URL, LLM key, optional geocoder + data.g
 
 ## Roadmap
 
-The next milestone is **Rasta API** — a scalable, monetised Go REST API serving this
-verified graph as a developer data product:
+**Rasta API** — a scalable, monetised Go REST API serving this verified graph as a
+developer data product — is now built (`chi` + `pgx`/`sqlc` + `go-redis`):
 
-- `chi` + `pgx`/`sqlc` + `go-redis`, OpenAPI via `swaggo`, deployed on Render.
-- `/v1/places`, `/v1/entities?type=festival`, `/v1/cities`, cursor pagination.
-- Self-serve developer signup (Supabase Auth) + API keys + usage.
-- Plan-aware rate limiting & a Razorpay paywall (Free / Pro / Enterprise).
+- ✅ **Go API core** — `/v1/places`, `/v1/entities?type=festival`, `/v1/cities`, `/v1/stats`,
+  cursor pagination, plus radius (`near`+`radius_km`) and bounding-box (`bbox`) map queries.
+- ✅ **Scalable layer** — API-key auth → plans, Redis rate-limiting + anti-scraping,
+  ETag/304 caching, tests + GitHub Actions CI.
+- ✅ **Developer portal** — Supabase-Auth signup/login, a dashboard that creates/revokes
+  API keys and shows per-key usage, Scalar-rendered docs.
+- ✅ **Razorpay paywall** — Free / Pro / Enterprise plans, subscription + webhook → plan
+  flip (functionality complete; live Razorpay keys to be added to activate).
+- ⏳ Still pending: the consumer site (M5) and final polish (M6).
 
 See [`PROJECT_CONTEXT.md`](./PROJECT_CONTEXT.md) and [`pipeline-spec.md`](./pipeline-spec.md)
 for the architectural source-of-truth.

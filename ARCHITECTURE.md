@@ -18,8 +18,11 @@ cuisines, folk sports, dances…), where **every claim cites its source**. The m
 — it's that each fact is backed by a real creator/source you can inspect ("receipts"), and that
 culture is modeled as a first-class citizen, not just restaurants and hotels.
 
-Numbers today: ~4,900 active entities, ~570 destinations, 4 source platforms (YouTube, Wikipedia,
-blogs, podcasts), ~96% of physical places geocoded.
+Numbers today: 8,136 active entities (~1,800 of them cultural — crafts, festivals, cuisines,
+dances, folk sports, art forms), 870 destinations, ~900 cities, 9,995 sourced claims, and 1,454
+sources across 4 platforms (Wikipedia 751, YouTube 409, blogs 267, podcasts 27). ~93% of physical
+places are geocoded, which powers the API's radius (`near`+`radius_km`) and bounding-box (`bbox`)
+map queries.
 
 ---
 
@@ -96,6 +99,10 @@ machine; only the text extraction uses the (cheap) LLM.
 **The curated batch runner** (`scripts/run_batch.sh` + lists in `scripts/batches/`) themes
 ingestion (cuisines, sports, dances, crafts, monuments, nature, pilgrimage…) and sets the OpenAI
 env so extraction isn't capped. Video lists are curated with `yt-dlp ytsearch` for real IDs.
+The graph grew through several curated rounds (`india_gaps`, `depth_breadth`, `india_wide`,
+`frontier`, `frontier2`) that now cover **all Indian states + union territories**, tier-2/3 cities,
+and cultural breadth — folk theatre, dance forms, crafts, textiles, folk music, festivals, regional
+cuisines and traditional sports.
 
 ---
 
@@ -135,7 +142,7 @@ against India.
 
 **Why multiple providers instead of parallelizing one?** Free geocoders ban parallel hits to a
 single service; running N providers concurrently multiplies throughput *without* tripping any one's
-limit. This took coverage 86% → ~97%.
+limit. This took coverage 86% → ~93%.
 
 ---
 

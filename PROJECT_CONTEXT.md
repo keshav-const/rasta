@@ -2,7 +2,7 @@
 
 **Working name:** Rasta
 **Scope:** India-wide, multi-source **cultural** travel graph (grew out of a Delhi/Gurgaon MVP)
-**Last updated:** 2026-11-06
+**Last updated:** 2026-11-16
 **Purpose of this file:** Full context so work can resume on a new device (or a fresh Claude session) without re-deriving anything. The architectural source-of-truth is [`pipeline-spec.md`](./pipeline-spec.md); the public overview is [`README.md`](./README.md); this file records what has actually been *built* and what's next.
 
 > ⚠️ **Parts of §3–§12 below are from the original NCR/Windows MVP and are stale** (e.g. `C:\ts` paths, Python 3.14, Agnes AI LLM). Current reality: macOS at `/Users/admin/Downloads/ts`, venv `.venv-mac` (Python 3.9), extraction via `gpt-4o-mini` (OpenAI). The **Update log** and **§2** below reflect the current state; treat them as authoritative where they conflict with older sections.
@@ -16,7 +16,7 @@ multi-source cultural graph**.
 
 **New: it's a cultural graph, not places-only.** `points_of_interest.entity_type` now
 admits cultural entities — `art_form`, `performing_art`, `craft`, `festival`, `cuisine`,
-`dish`, `cultural` — each anchored to its region's destination (no lat/lng; attaches to a
+`dish`, `sport`, `cultural` — each anchored to its region's destination (no lat/lng; attaches to a
 geocoded destination). Gate (stage3) + extractor (stage5) + resolver (stage6) all updated;
 widened via migration `20261104130000_cultural_entity_types.sql`.
 
@@ -29,7 +29,7 @@ widened via migration `20261104130000_cultural_entity_types.sql`.
 **Reliability + speed:**
 - Transcript self-pacing (`TRANSCRIPT_MIN_INTERVAL_SEC` in stage4) + `scripts/auto_retry_blocked.sh` / `scripts/retry_blocked.py` to recover IP-blocked YouTube videos hands-off.
 - **Scoring:** rewritten to one connection + bulk fetch/update — ~37 min → ~42 s (≈50×).
-- **Geocoding:** `scripts/hackathon_export/geocode_pois.py` now runs a concurrent **multi-provider pool** (Photon · Nominatim · LocationIQ · Geoapify), marks permanent failures so they're never re-tried, and fast-fails — coverage 86% → ~97%. Keyless works; `LOCATIONIQ_API_KEY` / `GEOAPIFY_API_KEY` add speed.
+- **Geocoding:** `scripts/hackathon_export/geocode_pois.py` now runs a concurrent **multi-provider pool** (Photon · Nominatim · LocationIQ · Geoapify), marks permanent failures so they're never re-tried, and fast-fails — coverage 86% → ~93%. Keyless works; `LOCATIONIQ_API_KEY` / `GEOAPIFY_API_KEY` add speed. These lat/lng power the API's radius (`near`+`radius_km`) and bounding-box (`bbox`) map queries.
 
 **LLM:** extraction is `gpt-4o-mini` (OpenAI, no daily cap) for batches; the gate/extractor stay provider-agnostic.
 
@@ -59,10 +59,12 @@ Framing note: it is a **travel-graph aggregator**, not "creator recommendations.
 | Web — public site | ✅ built (design-polished) |
 | Web — admin console | ✅ built + **password-gated auth** (see §12) |
 
-**Data as of 2026-11-06 (India-wide):** ~4,000 active entities (~800 of them cultural),
-~470 destinations, ~97% of physical places geocoded, across **4 source platforms**
-(Wikipedia ~291 · YouTube ~263 · blogs ~169 · podcasts) + 24 states enriched with official
-tourist-visit stats. Numbers are live — query the DB for exact.
+**Data as of 2026-11-16 (India-wide):** **8,136** active entities (~1,800 of them cultural —
+poi 6,195 · cultural 1,048 · cuisine 344 · dish 269 · activity 136 · festival 92 · sport 26 ·
+craft 15 · performing_art 9 · art_form 2), **870** destinations, **~900** cities, **9,995** sourced
+claims, ~93% of physical places geocoded, across **1,454 sources** on **4 platforms**
+(Wikipedia 751 · YouTube 409 · blogs 267 · podcasts 27) + 24 states enriched with official
+tourist-visit stats. These are the live `/v1/stats` headline counts — query the DB for exact.
 
 - Sources are ingested in batches (Wikipedia by theme/category, blog listicles, YouTube
   discovery, podcasts) then consolidated with `resolve.py → score.py → geocode_pois.py`.
@@ -255,13 +257,22 @@ Dev default password currently set locally: `rasta-admin-2026` — **change befo
 
 ## 9. What's next (roadmap)
 
-**THE next milestone — Rasta API (Go).** The data/graph is mature and multi-source;
-the product value now is exposing it. Build a scalable, monetised **Go REST API** over
-the graph (separate repo `rasta-api`): `chi` + `pgx`/`sqlc` + `go-redis`, OpenAPI via
-`swaggo`, deployed on Render. Endpoints `/v1/places`, `/v1/entities?type=festival`,
-`/v1/cities`, cursor pagination; self-serve developer signup (Supabase Auth) + API keys +
-usage; plan-aware rate limiting + Razorpay paywall (Free/Pro/Enterprise). Schema groundwork
-(api_keys, subscriptions, api_usage, destinations.country) already applied.
+**Rasta API (Go) — now built.** The data/graph is mature and multi-source; the product value
+is exposing it, and the scalable, monetised **Go REST API** over the graph (separate repo
+`rasta-api`, `chi` + `pgx`/`sqlc` + `go-redis`) now ships. Milestone status:
+
+- **M0 data & schema** ✅ · **M1 Go API core** ✅ — `/v1/places`, `/v1/entities?type=festival`,
+  `/v1/cities`, `/v1/stats`, cursor pagination, plus radius (`near`+`radius_km`) and bounding-box
+  (`bbox`) map queries off the geocoded coordinates.
+- **M2 scalable layer** ✅ — API-key auth → plans, Redis rate-limiting + anti-scraping, ETag/304
+  caching, tests + GitHub Actions CI.
+- **M3 developer portal** ✅ — Supabase-Auth signup/login, a dashboard that creates/revokes API
+  keys and shows per-key usage, Scalar-rendered docs.
+- **M4 Razorpay paywall** ✅ (functionality complete) — Free/Pro/Enterprise plans, subscription +
+  webhook → plan flip; live Razorpay keys still to be added to activate.
+- **M5 (consumer site)** and **M6 (polish)** are still pending.
+
+Schema groundwork (api_keys, subscriptions, api_usage, destinations.country) is applied.
 
 **Data sources — effectively complete.** Covered: YouTube, Wikipedia/Wikivoyage, blogs,
 podcasts (local whisper) + open-gov tourist stats. Remaining candidates are low-value:

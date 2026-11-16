@@ -4,6 +4,16 @@
 **Scope:** Delhi + Gurgaon (NCR region)  
 **Date:** June 2026
 
+> ⚠️ **This is the original MVP design spec (Delhi/Gurgaon, YouTube-only, places-only).** The stage
+> architecture below still holds, but the product has since grown **India-wide and multi-source**:
+> ~8,100 active entities across 870 destinations and ~900 cities, with **cultural entities** modeled
+> as first-class types (`art_form`, `performing_art`, `craft`, `festival`, `cuisine`, `dish`,
+> `sport`, `cultural`) alongside `poi`/`activity`; sources now span Wikipedia, YouTube, blogs and
+> podcasts (1,454 total); and geocoding is a **concurrent multi-provider** pass (not just Google
+> Places) covering ~93% of physical POIs, which powers the API's radius and bounding-box map
+> queries. See [`ARCHITECTURE.md`](./ARCHITECTURE.md) and [`PROJECT_CONTEXT.md`](./PROJECT_CONTEXT.md)
+> for the current state.
+
 ---
 
 ## Pipeline Overview
