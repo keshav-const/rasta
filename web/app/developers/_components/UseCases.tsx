@@ -40,50 +40,110 @@ const GRID_BG: React.CSSProperties = {
 /* --------------------------------- the 5 scenes --------------------------------- */
 
 function MapScene() {
+  // query point sits at ~50%,54%; pins fall inside the radius ring around it.
   const pins = [
-    { n: "Chaat", s: "✓ 3 src", x: 26, y: 40, d: 1.1 },
-    { n: "Nihari", s: "✓ 4 src", x: 58, y: 28, d: 1.7 },
-    { n: "Vada Pav", s: "✓ 2 src", x: 44, y: 64, d: 2.3 },
-    { n: "Paratha", s: "✓ 5 src", x: 74, y: 56, d: 2.9 },
+    { n: "Chaat", s: "✓ 3 src", x: 38, y: 44, d: 2.0 },
+    { n: "Nihari", s: "✓ 4 src", x: 61, y: 46, d: 2.5 },
+    { n: "Vada Pav", s: "✓ 2 src", x: 44, y: 68, d: 3.0 },
+    { n: "Paratha", s: "✓ 5 src", x: 60, y: 66, d: 3.5 },
   ];
   return (
-    <div className="absolute inset-0">
-      <div className="absolute inset-0" style={GRID_BG} />
+    <div className="absolute inset-0 overflow-hidden">
+      {/* hand-drawn city map, slowly panning (ken-burns) for a video feel */}
+      <svg
+        className="uc-pan absolute inset-0 h-full w-full"
+        viewBox="0 0 400 260"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden
+      >
+        <rect width="400" height="260" fill="rgba(128,128,128,.04)" />
+        {/* river */}
+        <path
+          d="M330,-10 C318,50 352,100 330,150 C312,196 346,236 330,270 L420,270 L420,-10 Z"
+          fill="rgba(70,130,180,.16)"
+        />
+        <path d="M330,-10 C318,50 352,100 330,150 C312,196 346,236 330,270" stroke="rgba(70,130,180,.3)" strokeWidth="1.5" fill="none" />
+        {/* parks */}
+        <rect x="34" y="36" width="78" height="52" rx="9" fill="rgba(60,160,90,.15)" />
+        <rect x="150" y="186" width="92" height="56" rx="9" fill="rgba(60,160,90,.15)" />
+        {/* minor street grid (subtle) */}
+        <g stroke="rgba(128,128,128,.14)" strokeWidth="1">
+          {[40, 80, 120, 160, 200, 240, 280].map((y) => (
+            <line key={`h${y}`} x1="0" y1={y} x2="330" y2={y} />
+          ))}
+          {[40, 90, 140, 190, 240, 290].map((x) => (
+            <line key={`v${x}`} x1={x} y1="0" x2={x} y2="260" />
+          ))}
+        </g>
+        {/* arterial roads (casing + fill so they read as highways, not grid) */}
+        <g fill="none" strokeLinecap="round">
+          <path d="M-10,96 C120,84 240,108 340,86" stroke="rgba(128,128,128,.28)" strokeWidth="8" />
+          <path d="M-10,96 C120,84 240,108 340,86" stroke="rgba(255,255,255,.55)" strokeWidth="3" />
+          <path d="M165,-10 C176,110 150,170 176,270" stroke="rgba(128,128,128,.28)" strokeWidth="8" />
+          <path d="M165,-10 C176,110 150,170 176,270" stroke="rgba(255,255,255,.55)" strokeWidth="3" />
+          <path d="M10,250 C130,180 230,150 345,70" stroke="rgba(128,128,128,.22)" strokeWidth="6" />
+        </g>
+        {/* faint district labels */}
+        <g fill="rgba(128,128,128,.4)" fontSize="9" fontStyle="italic">
+          <text x="46" y="66">Old City</text>
+          <text x="300" y="130">Riverside</text>
+          <text x="166" y="214">City Park</text>
+        </g>
+      </svg>
+
       {/* search bar */}
-      <div className="uc-pop absolute left-3 right-3 top-3 flex items-center gap-2 rounded-lg border border-line bg-paper px-2.5 py-1.5 shadow-sm">
+      <div className="uc-pop absolute left-3 right-3 top-3 z-20 flex items-center gap-2 rounded-lg border border-line bg-paper/95 px-2.5 py-1.5 shadow-sm backdrop-blur-sm">
         <span className="text-ink-mute">⌕</span>
         <span className="text-[11px] text-ink-soft">trusted street food near me</span>
-        <span className="ml-auto rounded bg-vermilion px-1.5 py-0.5 text-[9px] font-medium text-paper">
+        <span className="ml-auto rounded bg-vermilion px-1.5 py-0.5 font-mono text-[9px] font-medium text-paper">
           near 28.61, 77.21
         </span>
       </div>
-      {/* pins */}
+
+      {/* expanding search radius (near + radius_km) */}
+      <div
+        className="uc-radius absolute left-1/2 top-[54%] z-10 h-40 w-40 rounded-full border-2 border-vermilion/60 bg-vermilion/5"
+        style={{ animationDelay: "0.9s" }}
+      />
+      <span
+        className="uc-fade absolute left-[calc(50%+2.6rem)] top-[calc(54%-3.1rem)] z-10 rounded bg-vermilion px-1.5 py-0.5 text-[9px] font-medium text-paper"
+        style={{ animationDelay: "1.6s" }}
+      >
+        r = 3 km
+      </span>
+      {/* query point */}
+      <div className="absolute left-1/2 top-[54%] z-10 -translate-x-1/2 -translate-y-1/2">
+        <span className="relative flex h-3 w-3">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ink/40" />
+          <span className="relative h-3 w-3 rounded-full border-2 border-paper bg-ink shadow" />
+        </span>
+      </div>
+
+      {/* trusted pins drop inside the radius */}
       {pins.map((p) => (
         <div
           key={p.n}
-          className="uc-drop absolute -translate-x-1/2"
+          className="uc-drop absolute z-20 -translate-x-1/2"
           style={{ left: `${p.x}%`, top: `${p.y}%`, animationDelay: `${p.d}s` }}
         >
           <div className="flex flex-col items-center">
-            <span className="relative flex h-3.5 w-3.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-vermilion opacity-50" />
-              <span className="relative h-3.5 w-3.5 rounded-full border-2 border-paper bg-vermilion shadow" />
-            </span>
+            <span className="h-3.5 w-3.5 rounded-full border-2 border-paper bg-vermilion shadow" />
             <span className="mt-1 whitespace-nowrap rounded bg-ink/85 px-1.5 py-0.5 text-[9px] font-medium text-paper">
               {p.n} · {p.s}
             </span>
           </div>
         </div>
       ))}
+
       {/* result card slides up */}
       <div
-        className="uc-slideup absolute bottom-3 left-3 right-3 flex items-center gap-2 rounded-lg border border-line bg-paper px-3 py-2 shadow"
-        style={{ animationDelay: "3.5s" }}
+        className="uc-slideup absolute bottom-3 left-3 right-3 z-20 flex items-center gap-2 rounded-lg border border-line bg-paper/95 px-3 py-2 shadow backdrop-blur-sm"
+        style={{ animationDelay: "4.2s" }}
       >
         <span className="grid h-7 w-7 place-items-center rounded bg-vermilion/10 text-vermilion">📍</span>
         <div className="min-w-0">
           <div className="text-[11px] font-medium text-ink">Chaat — 0.4 km away</div>
-          <div className="text-[10px] text-ink-mute">sorted nearest-first · every pin cites its sources</div>
+          <div className="text-[10px] text-ink-mute">4 trusted spots in radius · nearest-first · each cites its sources</div>
         </div>
       </div>
     </div>
@@ -440,6 +500,8 @@ export default function UseCases() {
         @keyframes ucPage{0%{opacity:0}6%{opacity:1}30%{opacity:1}39%{opacity:0}100%{opacity:0}}
         @keyframes ucTab{0%,100%{border-color:var(--color-line,#e7e1d6);background:transparent;color:inherit}3%,30%{border-color:#e4572e;background:rgba(228,87,46,.08);color:#e4572e}}
         @keyframes ucReject{0%{opacity:0;transform:translateX(20px)}18%{opacity:1;transform:translateX(0)}60%{opacity:1;text-decoration:none}80%,100%{opacity:.3;transform:translateX(-10px);text-decoration:line-through}}
+        @keyframes ucPan{from{transform:scale(1.05) translate(0,0)}to{transform:scale(1.13) translate(-2.5%,-3%)}}
+        @keyframes ucRadius{0%{opacity:0;transform:translate(-50%,-50%) scale(0)}55%{opacity:1}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
         .uc-drop{opacity:0;animation:ucDrop .7s cubic-bezier(.2,.7,.3,1) both}
         .uc-slideup{opacity:0;animation:ucSlideUp .6s ease-out both}
         .uc-slidein{opacity:0;animation:ucSlideIn .5s ease-out both}
@@ -451,8 +513,11 @@ export default function UseCases() {
         .uc-page{opacity:0;animation:ucPage 9s ease-in-out both}
         .uc-tab{animation:ucTab 9s ease-in-out both}
         .uc-reject{opacity:0;animation:ucReject 3.6s ease-out both}
+        .uc-pan{transform-origin:center;animation:ucPan 9s ease-out both}
+        .uc-radius{transform:translate(-50%,-50%) scale(0);animation:ucRadius 1.5s cubic-bezier(.2,.7,.3,1) both}
         @media (prefers-reduced-motion: reduce){
-          .uc-drop,.uc-slideup,.uc-slidein,.uc-fade,.uc-pop,.uc-grow,.uc-typing,.uc-page,.uc-tab,.uc-reject{animation-duration:.01ms!important;opacity:1!important}
+          .uc-drop,.uc-slideup,.uc-slidein,.uc-fade,.uc-pop,.uc-grow,.uc-typing,.uc-page,.uc-tab,.uc-reject,.uc-radius{animation-duration:.01ms!important;opacity:1!important}
+          .uc-pan{animation:none!important}
           .uc-dot{animation:none!important}
         }
       `}</style>
