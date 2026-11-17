@@ -3,80 +3,64 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import GlassSurface from "./GlassSurface";
 
-export function SiteHeader() {
+// A clean, always-legible header. Two modes:
+//  • onHero (over the dark photo hero, before scroll): a dark translucent bar + light text.
+//  • solid  (every other page, or after scrolling the hero): opaque paper bar + ink text.
+// (The previous glass/refraction header bled the hero headline through it and vanished on
+//  light pages — this replaces it with a plain, readable bar.)
+
+export function SiteHeader({ onHero = false }: { onHero?: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const light = !scrolled; // over dark hero -> light text + visible dark-bg backing
-  const tone = light ? "text-paper" : "text-ink";
-  const hover = light ? "hover:bg-paper/10 hover:text-paper" : "hover:bg-ink/5 hover:text-ink";
+  const glass = onHero && !scrolled; // light text over the photo
+  const tone = glass ? "text-paper" : "text-ink";
+  const linkHover = glass ? "hover:bg-paper/15" : "hover:bg-ink/5";
 
   return (
     <motion.header
       initial={{ y: -24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-      className="fixed inset-x-0 top-4 z-50 flex justify-center px-4"
+      transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+      className="fixed inset-x-0 top-3 z-50 flex justify-center px-4"
     >
-      {/* Adaptive backing sits BEHIND the transparent glass so the pill stays
-          visible on flat dark backgrounds (where refraction has nothing to bend). */}
       <div
-        className={`relative w-full max-w-3xl rounded-full transition-all duration-500 ${
-          light
-            ? "bg-paper/12 ring-1 ring-paper/25 shadow-[0_16px_44px_-18px_rgba(0,0,0,0.65)]"
-            : "ring-1 ring-ink/10 shadow-[0_16px_44px_-24px_rgba(23,20,15,0.35)]"
+        className={`flex w-full max-w-3xl items-center justify-between rounded-full border py-1.5 pl-3 pr-2 transition-all duration-300 ${
+          glass
+            ? "border-paper/20 bg-ink/40 backdrop-blur-md shadow-[0_10px_40px_-18px_rgba(0,0,0,0.7)]"
+            : "border-line bg-paper-card/90 backdrop-blur-md shadow-[0_10px_34px_-20px_rgba(23,20,15,0.4)]"
         }`}
       >
-        <GlassSurface
-          width="100%"
-          height={58}
-          borderRadius={40}
-          backgroundOpacity={0}
-          saturation={1.8}
-          brightness={62}
-          blur={11}
-          displace={1}
-          distortionScale={-140}
-          greenOffset={12}
-          blueOffset={22}
-          className="!w-full"
-        >
-          <div className="flex w-full items-center justify-between pl-3 pr-2.5">
-            <Link href="/" className={`flex items-center gap-2.5 ${tone}`}>
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-vermilion font-display text-base font-semibold text-paper shadow-[0_6px_16px_-6px_rgba(234,78,27,0.9)]">
-                K
-              </span>
-              <span className="font-display text-lg font-semibold tracking-tight">Khoj</span>
-            </Link>
+        <Link href="/" className={`flex items-center gap-2.5 ${tone}`}>
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-vermilion font-display text-base font-semibold text-paper shadow-[0_6px_16px_-6px_rgba(234,78,27,0.9)]">
+            K
+          </span>
+          <span className="font-display text-lg font-semibold tracking-tight">Khoj</span>
+        </Link>
 
-            <nav className={`flex items-center gap-1 text-sm ${tone}`}>
-              <Link href="/explore" className={`hidden rounded-full px-3.5 py-1.5 transition sm:block ${hover}`}>
-                Explore
-              </Link>
-              <Link href="/#cities" className={`hidden rounded-full px-3.5 py-1.5 transition sm:block ${hover}`}>
-                Destinations
-              </Link>
-              <Link href="/search" className={`rounded-full px-3.5 py-1.5 transition ${hover}`}>
-                Search
-              </Link>
-              <Link
-                href="/developers"
-                className={`ml-1 rounded-full px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] ${
-                  light ? "bg-paper/15 text-paper" : "bg-ink/10 text-ink"
-                }`}
-              >
-                Developers
-              </Link>
-            </nav>
-          </div>
-        </GlassSurface>
+        <nav className={`flex items-center gap-0.5 text-sm font-medium ${tone}`}>
+          <Link href="/explore" className={`hidden rounded-full px-3 py-1.5 transition sm:block ${linkHover}`}>
+            Explore
+          </Link>
+          <Link href="/#cities" className={`hidden rounded-full px-3 py-1.5 transition sm:block ${linkHover}`}>
+            Destinations
+          </Link>
+          <Link href="/search" className={`rounded-full px-3 py-1.5 transition ${linkHover}`}>
+            Search
+          </Link>
+          <Link
+            href="/developers"
+            className="ml-1 rounded-full bg-vermilion px-3.5 py-1.5 text-[13px] font-semibold text-paper transition hover:opacity-90"
+          >
+            Developers
+          </Link>
+        </nav>
       </div>
     </motion.header>
   );

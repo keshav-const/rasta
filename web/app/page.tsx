@@ -27,23 +27,23 @@ export default async function Home() {
       <section className="relative min-h-[88vh] overflow-hidden bg-ink text-paper">
         <div className="absolute inset-0">
           <Image
-            src="/hero/india-gate.jpg"
-            alt="India"
+            src="/hero/humayun.jpg"
+            alt="Humayun's Tomb, Delhi"
             fill
             priority
             sizes="100vw"
-            className="kenburns object-cover"
+            className="kenburns object-cover object-center"
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/60 to-ink/90" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/65 to-ink/92" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/55 to-ink/25" />
         <div className="grain absolute inset-0 opacity-40" />
-        <div className="opacity-70">
+        <div className="opacity-60">
           <Blobs />
         </div>
-        <SiteHeader />
+        <SiteHeader onHero />
 
-        <div className="relative z-10 mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-center px-6 pt-24">
+        <div className="relative z-10 mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-center px-6 pb-16 pt-32">
           <Reveal>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-paper/12 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.25em] text-paper ring-1 ring-paper/25">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-vermilion" />
@@ -51,7 +51,7 @@ export default async function Home() {
             </div>
           </Reveal>
           <Reveal>
-            <h1 className="max-w-3xl font-display text-5xl font-semibold leading-[1.05] sm:text-6xl">
+            <h1 className="max-w-3xl font-display text-4xl font-semibold leading-[1.07] sm:text-5xl lg:text-[3.4rem]">
               India’s places & living culture — every claim with receipts.
             </h1>
           </Reveal>
