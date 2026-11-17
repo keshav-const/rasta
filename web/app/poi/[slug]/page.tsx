@@ -1,227 +1,232 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { supabaseAdmin } from "@/lib/supabase";
+import type { Metadata } from "next";
 import { SiteHeader } from "@/app/_components/site-header";
 import { Reveal } from "@/app/_components/reveal";
-import { Photo } from "@/app/_components/photo";
+import PoiMap from "@/app/_components/PoiMap";
+import { getPlace, type Evidence } from "@/lib/khoj";
 
 export const dynamic = "force-dynamic";
 
-type Claim = { field: string; value: string; evidence?: string; timestamp_seconds?: number; confidence?: number };
+const pretty = (s: string | null | undefined) =>
+  (s ?? "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+const TYPE_LABELS: Record<string, string> = {
+  festival: "Festival",
+  cuisine: "Cuisine",
+  dish: "Dish",
+  sport: "Sport",
+  craft: "Craft",
+  performing_art: "Performing art",
+  art_form: "Art form",
+  cultural: "Culture",
+  activity: "Activity",
+};
+function typeLabel(entity_type: string, category: string | null) {
+  if (entity_type === "poi") return pretty(category) || "Place";
+  return TYPE_LABELS[entity_type] ?? pretty(entity_type);
+}
+
+const PLATFORM: Record<string, { label: string; glyph: string }> = {
+  youtube: { label: "YouTube", glyph: "▶" },
+  wikipedia: { label: "Wikipedia", glyph: "W" },
+  blog: { label: "Blog", glyph: "✎" },
+  podcast: { label: "Podcast", glyph: "🎙" },
+};
+const platformMeta = (p: string) => PLATFORM[p] ?? { label: pretty(p), glyph: "•" };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const p = await getPlace(slug);
+  if (!p) return { title: "Not found — Khoj" };
+  return {
+    title: `${p.name} — ${pretty(p.city)} · Khoj`,
+    description: `${p.name}: corroborated by ${p.trust.sources} sources across ${p.trust.platforms} platforms.`,
+  };
+}
+
+function StanceTag({ stance }: { stance: string }) {
+  const tone =
+    stance === "recommended"
+      ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+      : stance === "warned_against"
+        ? "text-red-700 bg-red-50 border-red-200"
+        : "text-ink-mute bg-paper border-line";
+  return (
+    <span className={`rounded-full border px-2 py-0.5 text-[10px] font-medium capitalize ${tone}`}>
+      {stance.replace(/_/g, " ")}
+    </span>
+  );
+}
+
+function SourceRow({ e }: { e: Evidence }) {
+  const m = platformMeta(e.source.platform);
+  const inner = (
+    <div className="flex items-start gap-3 rounded-xl border border-line bg-paper-card p-4 transition hover:border-ink/30">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-ink/5 font-mono text-sm text-ink">
+        {m.glyph}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="mb-0.5 flex flex-wrap items-center gap-2">
+          <span className="rounded border border-line px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-ink-soft">
+            {m.label}
+          </span>
+          <StanceTag stance={e.stance} />
+          {e.source.upload_date && (
+            <span className="text-[11px] text-ink-mute">{e.source.upload_date}</span>
+          )}
+        </div>
+        <div className="truncate font-medium text-ink">{e.source.title ?? "Untitled source"}</div>
+        {e.source.creator && <div className="truncate text-xs text-ink-mute">{e.source.creator}</div>}
+      </div>
+      {e.source.url && <span className="shrink-0 self-center text-ink-mute">↗</span>}
+    </div>
+  );
+  return e.source.url ? (
+    <a href={e.source.url} target="_blank" rel="noreferrer" className="block">
+      {inner}
+    </a>
+  ) : (
+    inner
+  );
+}
 
 export default async function PoiPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const db = supabaseAdmin();
+  const p = await getPlace(slug);
+  if (!p) notFound();
 
-  const { data: rows } = await db
-    .from("points_of_interest")
-    .select("*, areas(name), destinations(name, slug)")
-    .eq("slug", slug)
-    .order("recommendation_score", { ascending: false })
-    .limit(1);
-  const poi = rows?.[0] as any;
-  if (!poi) notFound();
+  const trustPct = Math.round((p.trust?.score ?? 0) * 100);
+  const fresh = p.freshness;
+  const enduring = !fresh; // cultural/enduring types carry no freshness
 
-  const { data: evidence } = await db
-    .from("entity_evidence")
-    .select("stance, claims, sources(video_id, title, creator_name, view_count)")
-    .eq("entity_id", poi.id);
-
-  const score = Math.round((poi.recommendation_score ?? 0) * 100);
-  const ev = (evidence ?? []) as any[];
-
-  // "The details": distinct English facts NOT already shown in the verdict.
-  // (Raw evidence quotes are in the source language — Hindi here — so we surface
-  // the normalized English value instead of dumping transcript text.)
-  const COVERED = new Set([
-    "speciality", "must_try_item", "tip", "warning", "best_time", "price_level",
-    "crowd_level", "average_cost",
-  ]);
+  // distinct English facts from the claims (skip Devanagari transcript text + dupes)
   const DEVANAGARI = /[ऀ-ॿ]/;
-  const factSeen = new Set<string>();
-  const details = ev
-    .flatMap((e) => (Array.isArray(e.claims) ? (e.claims as Claim[]) : []).map((c) => ({ ...c, src: e.sources })))
-    .filter(
-      (c) =>
-        c.value &&
-        !COVERED.has((c.field ?? "").toLowerCase()) &&
-        !DEVANAGARI.test(c.value)
-    )
-    .sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0))
+  const seen = new Set<string>();
+  const facts = p.evidence
+    .flatMap((e) => e.claims ?? [])
+    .filter((c) => c.value && !DEVANAGARI.test(c.value))
     .filter((c) => {
       const k = `${c.field}|${c.value}`.toLowerCase();
-      if (factSeen.has(k)) return false;
-      factSeen.add(k);
+      if (seen.has(k)) return false;
+      seen.add(k);
       return true;
     })
     .slice(0, 8);
 
-  // Provenance: unique sources.
-  const srcMap = new Map<string, any>();
-  for (const e of ev) if (e.sources?.video_id) srcMap.set(e.sources.video_id, { ...e.sources, stance: e.stance });
-  const sources = [...srcMap.values()];
-
-  const practical = [
-    ["Best time", poi.best_time],
-    ["Price", poi.price_level],
-    ["Crowd", poi.crowd_info],
-    ["Avg cost", poi.average_cost_inr ? `₹${poi.average_cost_inr}` : null],
-  ].filter(([, v]) => v);
+  // platform mix for the trust story
+  const platforms = [...new Set(p.evidence.map((e) => e.source.platform))];
 
   return (
-    <div className="bg-paper">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-ink text-paper">
-        <Photo category={poi.poi_category} ratio="absolute inset-0 h-full w-full" className="opacity-45" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/75 to-ink/40" />
-        <SiteHeader />
-        <div className="relative z-10 mx-auto max-w-5xl px-6 pb-14 pt-40">
+    <div className="min-h-screen bg-paper">
+      <SiteHeader />
+      <main className="mx-auto max-w-4xl px-6 pb-20 pt-28">
+        <Reveal>
+          <Link href={`/city/${p.city}`} className="text-sm text-ink-soft transition hover:text-ink">
+            ← {pretty(p.city)}
+          </Link>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span className="rounded border border-line px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-ink-soft">
+              {typeLabel(p.entity_type, p.category)}
+            </span>
+            {!enduring && fresh && fresh.label !== "unknown" && (
+              <span className="rounded-full border border-line bg-paper px-2 py-0.5 text-[11px] font-medium capitalize text-ink-soft">
+                {fresh.label}
+              </span>
+            )}
+          </div>
+          <h1 className="mt-2 font-display text-4xl font-semibold text-ink sm:text-5xl">{p.name}</h1>
+        </Reveal>
+
+        {/* trust strip */}
+        <Reveal>
+          <div className="mt-6 grid gap-4 rounded-2xl border border-line bg-paper-card p-5 sm:grid-cols-[1fr_auto]">
+            <div>
+              <div className="mb-1 flex items-center justify-between text-xs text-ink-soft">
+                <span>Trust — how well-corroborated this is</span>
+                <span className="font-mono text-ink">{(p.trust?.score ?? 0).toFixed(2)}</span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-line">
+                <div className="h-full rounded-full bg-vermilion" style={{ width: `${trustPct}%` }} />
+              </div>
+              <p className="mt-2 text-sm text-ink-soft">
+                Backed by <span className="font-medium text-ink">{p.trust.sources} independent sources</span> across{" "}
+                <span className="font-medium text-ink">{p.trust.platforms} platforms</span>
+                {platforms.length > 0 && <> — {platforms.map(pretty).join(", ")}</>}.
+                {enduring ? (
+                  <> An enduring tradition, so it carries no freshness label.</>
+                ) : fresh ? (
+                  <> Freshness: <span className="font-medium text-ink">{fresh.label}</span>.</>
+                ) : null}
+              </p>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* map */}
+        {p.lat != null && p.lng != null && (
           <Reveal>
-            <Link href="/#places" className="font-mono text-[11px] uppercase tracking-[0.2em] text-paper/60 hover:text-paper">
-              ← Back to the graph
-            </Link>
-          </Reveal>
-          <Reveal delay={0.05}>
-            <div className="mt-6 flex items-end justify-between gap-6">
-              <div>
-                <div className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-vermilion">
-                  {(poi.poi_category ?? "place").replace(/_/g, " ")}
-                  {poi.areas?.name ? ` · ${poi.areas.name}` : ""}
-                  {poi.destinations?.name ? ` · ${poi.destinations.name}` : ""}
-                </div>
-                <h1 className="font-display text-6xl font-semibold leading-none tracking-tight md:text-7xl">
-                  {poi.name}
-                </h1>
-                {poi.name_local && <div className="mt-2 text-xl text-paper/60">{poi.name_local}</div>}
-              </div>
-              <div className="shrink-0 rounded-2xl glass-dark px-6 py-4 text-center">
-                <div className="font-display text-5xl font-semibold text-paper">{score}</div>
-                <div className="font-mono text-[10px] uppercase tracking-widest text-paper/50">graph score</div>
+            <div className="mt-6">
+              <PoiMap lat={p.lat} lng={p.lng} name={p.name} />
+              <div className="mt-1.5 flex items-center justify-between text-[11px] text-ink-mute">
+                <span className="font-mono">📍 {p.lat.toFixed(5)}, {p.lng.toFixed(5)}</span>
+                <a
+                  href={`https://www.openstreetmap.org/?mlat=${p.lat}&mlon=${p.lng}#map=15/${p.lat}/${p.lng}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline underline-offset-2 hover:text-ink"
+                >
+                  Open in OpenStreetMap ↗
+                </a>
               </div>
             </div>
           </Reveal>
-          <Reveal delay={0.12}>
-            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-vermilion px-4 py-1.5 text-sm font-medium text-paper">
-              Backed by {poi.frequency_count} source{poi.frequency_count === 1 ? "" : "s"}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <div className="mx-auto max-w-5xl px-6 py-16">
-        {/* The verdict */}
-        <Reveal><SectionLabel>The verdict</SectionLabel></Reveal>
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
-          <div className="space-y-8 md:col-span-2">
-            {poi.specialities?.length > 0 && (
-              <Reveal>
-                <Block title="Must try">
-                  <div className="flex flex-wrap gap-2">
-                    {poi.specialities.map((s: string, i: number) => (
-                      <span key={i} className="rounded-full bg-vermilion-soft px-3 py-1.5 text-sm text-vermilion">{s}</span>
-                    ))}
-                  </div>
-                </Block>
-              </Reveal>
-            )}
-            {poi.tips?.length > 0 && (
-              <Reveal>
-                <Block title="Good to know">
-                  <ul className="space-y-2">
-                    {poi.tips.map((t: string, i: number) => (
-                      <li key={i} className="flex gap-3 text-ink-soft"><span className="text-vermilion">→</span> {t}</li>
-                    ))}
-                  </ul>
-                </Block>
-              </Reveal>
-            )}
-            {poi.warnings?.length > 0 && (
-              <Reveal>
-                <Block title="Heads up">
-                  <ul className="space-y-2">
-                    {poi.warnings.map((w: string, i: number) => (
-                      <li key={i} className="flex gap-3 text-ink-soft"><span className="text-vermilion">⚠</span> {w}</li>
-                    ))}
-                  </ul>
-                </Block>
-              </Reveal>
-            )}
-          </div>
-
-          {practical.length > 0 && (
-            <Reveal delay={0.1}>
-              <div className="rounded-2xl border border-line bg-paper-card p-6">
-                <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.2em] text-ink-mute">Practical</div>
-                <dl className="space-y-4">
-                  {practical.map(([k, v]) => (
-                    <div key={k as string}>
-                      <dt className="font-mono text-[11px] uppercase tracking-wide text-ink-mute">{k}</dt>
-                      <dd className="mt-0.5 capitalize text-ink">{v as string}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            </Reveal>
-          )}
-        </div>
-
-        {/* The details — distinct English facts */}
-        {details.length > 0 && (
-          <div className="mt-16">
-            <Reveal><SectionLabel>The details</SectionLabel></Reveal>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {details.map((d, i) => (
-                <Reveal key={i} delay={i * 0.04}>
-                  <div className="flex h-full items-start gap-4 rounded-2xl border border-line bg-paper-card p-5">
-                    <div className="shrink-0 font-mono text-[11px] uppercase tracking-wide text-teal">
-                      {d.field?.replace(/_/g, " ")}
-                    </div>
-                    <div className="text-ink">{d.value}</div>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
         )}
 
-        {/* Sources — clean provenance, no transcript dump */}
-        <div className="mt-16">
-          <Reveal><SectionLabel>Sources · {sources.length}</SectionLabel></Reveal>
-          <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-paper-card">
-            {sources.map((s, i) => (
-              <a
-                key={i}
-                href={`https://youtu.be/${s.video_id}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center justify-between gap-4 px-6 py-4 transition hover:bg-paper-soft/60"
-              >
-                <div className="min-w-0">
-                  <div className="font-medium text-ink">{s.creator_name ?? "Creator"}</div>
-                  <div className="truncate text-sm text-ink-mute">{s.title}</div>
-                </div>
-                <div className="shrink-0 text-right font-mono text-[11px] text-ink-mute">
-                  <div className="uppercase tracking-wide text-teal">{s.stance?.replace(/_/g, " ")}</div>
-                  {s.view_count ? `${Intl.NumberFormat("en-IN").format(s.view_count)} views` : ""}
-                </div>
-              </a>
-            ))}
-          </div>
+        {/* facts */}
+        {facts.length > 0 && (
+          <Reveal>
+            <section className="mt-10">
+              <h2 className="mb-3 font-display text-xl font-semibold text-ink">What people say</h2>
+              <div className="flex flex-wrap gap-2">
+                {facts.map((f, i) => (
+                  <span key={i} className="rounded-lg border border-line bg-paper-card px-3 py-1.5 text-sm text-ink-soft">
+                    {f.field && <span className="text-ink-mute">{pretty(f.field)}: </span>}
+                    <span className="text-ink">{f.value}</span>
+                  </span>
+                ))}
+              </div>
+            </section>
+          </Reveal>
+        )}
+
+        {/* receipts — every source behind this entity, all platforms */}
+        <Reveal>
+          <section className="mt-10">
+            <h2 className="mb-1 font-display text-xl font-semibold text-ink">The receipts</h2>
+            <p className="mb-4 text-sm text-ink-soft">
+              Every source this entity is built from — the provenance behind the trust score.
+            </p>
+            <div className="grid gap-3">
+              {p.evidence.map((e, i) => (
+                <SourceRow key={i} e={e} />
+              ))}
+            </div>
+          </section>
+        </Reveal>
+
+        <div className="mt-12 rounded-2xl border border-line bg-paper-card p-5 text-sm text-ink-soft">
+          Every fact on this page came from the public{" "}
+          <Link href="/developers" className="font-medium text-vermilion underline underline-offset-2">
+            Khoj API
+          </Link>{" "}
+          — this site is its live demo. Build your own with the same data.
         </div>
-      </div>
-    </div>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <h2 className="mb-6 font-mono text-[11px] uppercase tracking-[0.25em] text-vermilion">{children}</h2>;
-}
-
-function Block({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <h3 className="mb-3 font-display text-2xl font-semibold text-ink">{title}</h3>
-      {children}
+      </main>
     </div>
   );
 }

@@ -87,6 +87,31 @@ everything the live API offers today. Facts/counts here are kept in sync with `/
 
 ---
 
+## 1a. The consumer site (M5) — dogfoods the live API
+
+The public India-wide site at `/` is the API's own showcase: **every page fetches through the Go
+API**, not the database. All calls go through one typed client, `lib/khoj.ts` (`getStats`,
+`listCities`, `listPlaces`, `getPlace`, `searchPlaces`), server-side with ~60s `revalidate`, so the
+live site exercises the exact endpoints a customer would (visible in the Network tab).
+
+Routes:
+| route | what it does |
+|---|---|
+| `/` | India-wide home: live `/v1/stats`, "Most corroborated" (`sort=trust&min_sources=2`), culture themes, destination grid (`/v1/cities`), search box |
+| `/city/[slug]` | a destination's entities (`/v1/places?city=`), filterable by type (Places / culture themes) |
+| `/explore?type=` | a culture theme across all India (`/v1/places?type=…&min_sources=2`) |
+| `/search?q=` | typo-tolerant search (`/v1/places?q=`) |
+| `/poi/[slug]` | one entity (`/v1/places/{slug}`): trust strip, a **keyless Leaflet/OSM map** from the geocoded `lat/lng`, and **"the receipts"** — every source, all platforms |
+
+Two things this milestone fixed vs. the old NCR build: it now reads from the **API** (was direct
+Supabase), and the POI page shows **all source platforms**. The old page keyed evidence by
+`sources.video_id`, silently dropping blog/Wikipedia/podcast sources; the new page renders the API's
+`evidence[].source.{platform,url,creator}` for every type (`_components/PoiMap.tsx` draws the map;
+`_components/EntityCard.tsx` is the shared browse card; `lib/display.ts` holds the shared labels).
+Branding is unified to **Khoj** and the site header links into `/developers`.
+
+---
+
 ## 2. Identity: Supabase Auth + a signed-cookie session
 
 Two layers, deliberately separated:
@@ -232,6 +257,17 @@ web/
     supabase.ts     # supabaseAdmin() — service_role client (server-only)
     apikey.ts       # mintApiKey() — the khoj_ key format (MUST match Go)
     usage.ts        # pure: aggregate api_usage rows → per-key totals + 14-day sparkline
+    khoj.ts         # consumer-site API client (dogfoods the Go API): getStats/listCities/listPlaces/getPlace/searchPlaces
+    display.ts      # shared UI labels: type labels, platform badges, culture themes
+  app/                                # the consumer site (M5) — dogfoods the API
+    page.tsx                          # home: stats + most-corroborated + themes + destinations + search
+    city/[slug]/page.tsx              # a destination's entities, filterable by type
+    explore/page.tsx                  # a culture theme across all India
+    search/page.tsx                   # typo-tolerant search
+    poi/[slug]/page.tsx               # one entity: trust + Leaflet map + multi-platform receipts
+    _components/EntityCard.tsx        # shared browse card → /poi/{slug}
+    _components/PoiMap.tsx            # client: keyless Leaflet + OSM tiles from lat/lng
+    _components/site-header.tsx       # Khoj brand, links into /explore /search /developers
   app/developers/
     page.tsx                        # landing — live stats + explorer + use-case reel + capability grid + CTAs
     _components/LiveExplorer.tsx    # client: calls the live API, renders trust/freshness/📍mapped, shows curl

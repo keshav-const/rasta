@@ -51,25 +51,29 @@ export function SiteHeader() {
           <div className="flex w-full items-center justify-between pl-3 pr-2.5">
             <Link href="/" className={`flex items-center gap-2.5 ${tone}`}>
               <span className="grid h-8 w-8 place-items-center rounded-full bg-vermilion font-display text-base font-semibold text-paper shadow-[0_6px_16px_-6px_rgba(234,78,27,0.9)]">
-                R
+                K
               </span>
-              <span className="font-display text-lg font-semibold tracking-tight">Rasta</span>
+              <span className="font-display text-lg font-semibold tracking-tight">Khoj</span>
             </Link>
 
             <nav className={`flex items-center gap-1 text-sm ${tone}`}>
-              <a href="/#places" className={`hidden rounded-full px-3.5 py-1.5 transition sm:block ${hover}`}>
-                Places
-              </a>
-              <a href="/#areas" className={`hidden rounded-full px-3.5 py-1.5 transition sm:block ${hover}`}>
-                Neighbourhoods
-              </a>
-              <span
-                className={`ml-1 rounded-full px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] ${
+              <Link href="/explore" className={`hidden rounded-full px-3.5 py-1.5 transition sm:block ${hover}`}>
+                Explore
+              </Link>
+              <Link href="/#cities" className={`hidden rounded-full px-3.5 py-1.5 transition sm:block ${hover}`}>
+                Destinations
+              </Link>
+              <Link href="/search" className={`rounded-full px-3.5 py-1.5 transition ${hover}`}>
+                Search
+              </Link>
+              <Link
+                href="/developers"
+                className={`ml-1 rounded-full px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.16em] ${
                   light ? "bg-paper/15 text-paper" : "bg-ink/10 text-ink"
                 }`}
               >
-                Delhi · NCR
-              </span>
+                Developers
+              </Link>
             </nav>
           </div>
         </GlassSurface>

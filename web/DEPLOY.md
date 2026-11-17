@@ -57,10 +57,16 @@ No change needed — the Go API sends `Access-Control-Allow-Origin: *`, so the d
 portal (new origin) can fetch the OpenAPI spec and call `/v1` (incl. the docs "try it").
 
 ## Post-deploy smoke test
-1. `/developers` loads; `/developers/docs` renders the Scalar reference.
-2. `/developers/signup` → create account → dashboard loads.
-3. Create a key → `curl -H "X-API-Key: khoj_..." $NEXT_PUBLIC_API_BASE/v1/places?limit=3` → 200.
-4. `/admin` → 404 (confirms admin is off).
+1. `/` loads the India-wide consumer site (hero + stats + "Most corroborated" + destinations).
+2. `/city/jaipur`, `/explore?type=festival`, `/search?q=kathak` return results; `/poi/<slug>`
+   shows the Leaflet map + multi-platform "receipts" (blog/wiki/video/podcast).
+3. `/developers` loads; `/developers/docs` renders the Scalar reference.
+4. `/developers/signup` → create account → dashboard loads.
+5. Create a key → `curl -H "X-API-Key: khoj_..." $NEXT_PUBLIC_API_BASE/v1/places?limit=3` → 200.
+6. `/admin` → 404 (confirms admin is off).
+
+Note: the Network tab on any consumer page shows the calls going to `$NEXT_PUBLIC_API_BASE/v1/*` —
+the site literally runs on the public API.
 
 ## Verified before first deploy
 - `next build` passes clean on the modified Next (16.2.10). `/developers/docs` prerenders static.
