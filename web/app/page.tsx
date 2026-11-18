@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import HeroBackdrop from "./_components/HeroBackdrop";
 import { SiteHeader } from "./_components/site-header";
 import { Reveal } from "./_components/reveal";
 import { Blobs } from "./_components/blobs";
@@ -25,20 +25,14 @@ export default async function Home() {
     <div className="bg-paper">
       {/* ---------------- Hero ---------------- */}
       <section className="relative min-h-[88vh] overflow-hidden bg-ink text-paper">
-        <div className="absolute inset-0">
-          <Image
-            src="/hero/humayun.jpg"
-            alt="Humayun's Tomb, Delhi"
-            fill
-            priority
-            sizes="100vw"
-            className="kenburns object-cover object-center"
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/65 to-ink/92" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/55 to-ink/25" />
-        <div className="grain absolute inset-0 opacity-40" />
-        <div className="opacity-60">
+        {/* rotating, brighter backdrop */}
+        <HeroBackdrop />
+        {/* Left-weighted scrim: keeps the text legible on the left while the photo stays
+            bright on the right (the old full-screen dark overlay made everything murky). */}
+        <div className="absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/45 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/55 via-transparent to-transparent" />
+        <div className="grain absolute inset-0 opacity-25" />
+        <div className="opacity-50">
           <Blobs />
         </div>
         <SiteHeader onHero />
