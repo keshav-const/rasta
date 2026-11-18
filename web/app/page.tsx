@@ -1,6 +1,8 @@
 import Link from "next/link";
 import HeroBackdrop from "./_components/HeroBackdrop";
 import { SiteHeader } from "./_components/site-header";
+import { SiteFooter } from "./_components/SiteFooter";
+import { PageTexture } from "./_components/PageTexture";
 import { Reveal } from "./_components/reveal";
 import { Blobs } from "./_components/blobs";
 import { EntityCard } from "./_components/EntityCard";
@@ -22,7 +24,8 @@ export default async function Home() {
   const cities = ((citiesRaw ?? []) as City[]).filter((c) => c.places > 0);
 
   return (
-    <div className="bg-paper">
+    <div>
+      <PageTexture />
       {/* ---------------- Hero ---------------- */}
       <section className="relative min-h-[88vh] overflow-hidden bg-ink text-paper">
         {/* rotating, brighter backdrop */}
@@ -182,6 +185,8 @@ export default async function Home() {
           </Link>
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }

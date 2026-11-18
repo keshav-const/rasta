@@ -5,9 +5,14 @@ import { useEffect, useState } from "react";
 
 // A slow cross-fading, ken-burns hero backdrop — gives the hero a subtle "video" feel
 // without a video file. Uses the warm, bright monuments (not the flat India Gate).
-// Wide, bright, warm panoramas only (qutub.jpg is portrait → crops badly in a wide hero).
+// Wide, bright, warm panoramas from across India (new ones sourced from Wikimedia Commons).
+// Ordered for variety; qutub.jpg is intentionally excluded (portrait → crops badly).
 const IMAGES = [
+  { src: "/hero/taj-mahal.jpg", alt: "Taj Mahal, Agra" },
+  { src: "/hero/hampi.jpg", alt: "Hampi, Karnataka" },
+  { src: "/hero/golden-temple.jpg", alt: "Golden Temple, Amritsar" },
   { src: "/hero/humayun.jpg", alt: "Humayun's Tomb, Delhi" },
+  { src: "/hero/mysore-palace.jpg", alt: "Mysore Palace, Karnataka" },
   { src: "/hero/jama-masjid.jpg", alt: "Jama Masjid, Delhi" },
 ];
 

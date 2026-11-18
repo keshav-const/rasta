@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/app/_components/site-header";
+import { SiteFooter } from "@/app/_components/SiteFooter";
+import { PageTexture } from "@/app/_components/PageTexture";
 import { Reveal } from "@/app/_components/reveal";
 import { EntityCard } from "@/app/_components/EntityCard";
 import { searchPlaces, type Place } from "@/lib/khoj";
@@ -17,7 +19,8 @@ export default async function SearchPage({
   const results = query ? ((await searchPlaces(query, 36)) as Place[] | null) ?? [] : [];
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen">
+      <PageTexture />
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-6 pb-20 pt-28">
         <Reveal>
@@ -62,6 +65,7 @@ export default async function SearchPage({
           </Reveal>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

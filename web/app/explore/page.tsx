@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/app/_components/site-header";
+import { SiteFooter } from "@/app/_components/SiteFooter";
+import { PageTexture } from "@/app/_components/PageTexture";
 import { Reveal } from "@/app/_components/reveal";
 import { EntityCard } from "@/app/_components/EntityCard";
 import { listPlaces, type Place } from "@/lib/khoj";
@@ -21,7 +23,8 @@ export default async function ExplorePage({
     | null) ?? [];
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen">
+      <PageTexture />
       <SiteHeader />
       <main className="mx-auto max-w-6xl px-6 pb-20 pt-28">
         <Reveal>
@@ -67,6 +70,7 @@ export default async function ExplorePage({
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

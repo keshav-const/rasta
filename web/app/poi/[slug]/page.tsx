@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/app/_components/site-header";
+import { SiteFooter } from "@/app/_components/SiteFooter";
+import { PageTexture } from "@/app/_components/PageTexture";
 import { Reveal } from "@/app/_components/reveal";
 import PoiMap from "@/app/_components/PoiMap";
 import { getPlace, type Evidence } from "@/lib/khoj";
@@ -122,7 +124,8 @@ export default async function PoiPage({ params }: { params: Promise<{ slug: stri
   const platforms = [...new Set(p.evidence.map((e) => e.source.platform))];
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen">
+      <PageTexture />
       <SiteHeader />
       <main className="mx-auto max-w-4xl px-6 pb-20 pt-28">
         <Reveal>
@@ -227,6 +230,7 @@ export default async function PoiPage({ params }: { params: Promise<{ slug: stri
           — this site is its live demo. Build your own with the same data.
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }
