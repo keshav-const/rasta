@@ -1,0 +1,39 @@
+# Round-5 "frontier3" blog batch — hill stations, beaches, waterfalls, wildlife + tier-2
+# cities across India. All curl-verified 200 on 2026-11-18. Dedup by source URL.
+# Run:  bash scripts/run_batch.sh blog scripts/batches/frontier3_blogs.txt
+
+# --- hill stations ---
+https://www.holidify.com/places/yercaud/
+https://www.holidify.com/places/coonoor/
+https://www.holidify.com/places/valparai/
+https://www.holidify.com/places/lansdowne/
+https://www.holidify.com/places/kasauli/
+https://www.holidify.com/places/dalhousie/
+https://www.holidify.com/places/kausani/
+https://www.holidify.com/places/binsar/
+https://www.holidify.com/places/lava/
+https://www.holidify.com/places/vagamon/
+https://www.holidify.com/places/bhandardara/
+https://www.holidify.com/places/amboli/
+https://www.holidify.com/places/chikmagalur/
+
+# --- beaches ---
+https://www.holidify.com/places/murudeshwar/
+https://www.holidify.com/places/tarkarli/
+https://www.holidify.com/places/gokarna/
+https://www.holidify.com/places/mandarmani/
+
+# --- waterfalls & natural wonders ---
+https://www.holidify.com/places/jog-falls/
+https://www.holidify.com/places/hogenakkal/
+https://www.holidify.com/places/lonar/
+https://www.holidify.com/places/sattal/
+https://www.holidify.com/places/araku-valley/
+
+# --- wildlife ---
+https://www.holidify.com/places/tadoba/
+
+# --- cities (fort/temple depth) ---
+https://www.holidify.com/places/jodhpur/
+https://www.holidify.com/places/madurai/
+https://www.holidify.com/places/hyderabad/

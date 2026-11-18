@@ -1,0 +1,16 @@
+# Round-5 "frontier3" podcast batch — travel/heritage, weighted to place stories. Two NEW
+# shows + two proven feeds (fresh episodes). Local faster-whisper, no API cost.
+# Feeds verified 200 + valid on 2026-11-18.
+# Run:  PODCAST_LIMIT=2 bash scripts/run_batch.sh podcast scripts/batches/frontier3_podcasts.txt
+
+# TravelBaits — unique experiences & stories across India (NEW).
+https://anchor.fm/s/2774c15c/podcast/rss
+
+# Incredible India Travel (NEW).
+https://feeds.transistor.fm/incredible-india-travel
+
+# The Musafir Stories — India travel, place-by-place (fresh episodes).
+https://www.omnycontent.com/d/playlist/e0dce4b3-2eb8-48cb-822c-af1d00e03e20/64cf3a81-17df-40ec-990a-af4e00a92e51/f5b69943-5379-4176-a258-af4e00a92e72/podcast.rss
+
+# Heritage India Podcast — monuments, history, heritage sites (fresh episodes).
+https://feeds.megaphone.fm/ISP9127950437

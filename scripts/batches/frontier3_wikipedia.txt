@@ -1,0 +1,139 @@
+# Round-5 "frontier3" Wikipedia batch — the BIG one. Breadth + depth across all of India:
+# hill stations, wildlife parks, beaches, forts, temples, waterfalls, lakes, regional
+# dishes, GI crafts and tribal festivals confirmed absent on 2026-11-18. Dedup by source.
+# Run:  bash scripts/run_batch.sh wikipedia scripts/batches/frontier3_wikipedia.txt
+
+# --- hill stations ---
+Yercaud
+Coonoor
+Kotagiri
+Valparai
+Lansdowne, India
+Kasauli
+Dalhousie, India
+Chail, Himachal Pradesh
+Kausani
+Binsar
+Lava, West Bengal
+Lolegaon
+Lachen, Sikkim
+Lachung
+Vagamon
+Ponmudi
+Horsley Hills
+Lambasingi
+Bhandardara
+Amboli
+Mcleodganj
+Chikmagalur
+
+# --- national parks & wildlife ---
+Simlipal National Park
+Pobitora Wildlife Sanctuary
+Nameri National Park
+Pench National Park
+Tadoba Andhari Tiger Reserve
+Melghat Tiger Reserve
+Manas National Park
+Namdapha National Park
+Dachigam National Park
+Keoladeo National Park
+Silent Valley National Park
+Eravikulam National Park
+
+# --- beaches ---
+Murudeshwara
+Tarkarli
+Ganpatipule
+Palolem
+Agonda
+Rushikonda
+Mandarmani
+Tajpur, West Bengal
+Kaup
+Radhanagar Beach
+
+# --- forts ---
+Golconda Fort
+Lohagad
+Panhala Fort
+Mehrangarh
+Nahargarh Fort
+Gingee Fort
+Bekal Fort
+Murud-Janjira
+Pratapgad
+Sinhagad
+
+# --- temples & pilgrimage ---
+Meenakshi Temple
+Modhera Sun Temple
+Dilwara Temples
+Padmanabhaswamy Temple
+Dharmasthala
+Kukke Subramanya
+Mookambika Temple, Kollur
+Arulmigu Dhandayuthapani Swamy Temple
+Yadadri
+Simhachalam
+Annavaram
+Lingaraja Temple
+Kamakhya Temple
+Sringeri
+
+# --- waterfalls ---
+Jog Falls
+Athirappilly Falls
+Kunchikal Falls
+Barehipani Falls
+Hogenakkal Falls
+Chitrakoot Falls
+
+# --- lakes & natural wonders ---
+Vembanad
+Prashar Lake
+Renuka Lake
+Sattal, India
+Lonar Lake
+Gurudongmar Lake
+Tsomgo Lake
+
+# --- regional dishes ---
+Pootharekulu
+Pazham pori
+Kozhukatta
+Shukto
+Pakhala
+Siddu (food)
+Pitha
+Bebinca
+Patoleo
+Dham (cuisine)
+Chak Hao
+Thukpa
+
+# --- GI crafts & textiles ---
+Etikoppaka
+Nirmal, Adilabad
+Kinnauri shawl
+Longpi
+Kauna
+Ganjifa
+Sujni embroidery
+Pipili
+Channapatna toys
+Bidriware
+
+# --- tribal & regional festivals ---
+Mopin
+Nyokum
+Sangken
+Ningol Chakkouba
+Garia
+Pushkaram
+Ambubachi Mela
+Jonbeel Mela
+Kharchi Puja
+Sammakka Saralamma Jatara
+Losar
+Chapchar Kut

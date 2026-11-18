@@ -1,0 +1,22 @@
+# Round-5 "frontier3" video batch — YouTube, curated via yt-dlp ytsearch 2026-11-18.
+# Waterfalls, forts, temples, hill stations, wildlife, lakes, regional food, crafts and
+# tribal festivals across India. run.py dedups already-processed videos.
+# Run:  bash scripts/run_batch.sh video scripts/batches/frontier3_videos.txt
+https://youtu.be/QRrnQFwyhlY
+https://youtu.be/mAmMX3YB2cI
+https://youtu.be/edFd50SjGvQ
+https://youtu.be/Keg7icC56Sg
+https://youtu.be/tE0TkzhSLJc
+https://youtu.be/QKsG_7IpfQ0
+https://youtu.be/71Cs72yQslg
+https://youtu.be/KCKIhFcFGEU
+https://youtu.be/CD7hX2pJH-k
+https://youtu.be/9QiUM0mb3UU
+https://youtu.be/_V_rHWp8HDI
+https://youtu.be/X_R696xDHvY
+https://youtu.be/XolsPCgzHGQ
+https://youtu.be/OkZIuXwiM38
+https://youtu.be/WLpX6x4Ctkg
+https://youtu.be/uATwEvrx2Ow
+https://youtu.be/ez54mRwuxKA
+https://youtu.be/IKakzXGL_2Q
