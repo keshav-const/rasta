@@ -1,0 +1,174 @@
+# Round-6 "frontier4" Wikipedia batch — TIER-2/3 CITIES across every region + a big
+# TRADITIONAL/FOLK SPORTS expansion (sport count was thin: ~26). Breadth + depth.
+# Titles use state suffixes where the bare name is ambiguous. Dedup by source.
+# Run:  bash scripts/run_batch.sh wikipedia scripts/batches/frontier4_wikipedia.txt
+
+# --- tier-2/3 cities: Uttar Pradesh / Uttarakhand ---
+Bareilly
+Moradabad
+Saharanpur
+Firozabad
+Shahjahanpur
+Rae Bareli
+Pilibhit
+Haldwani
+Rudrapur
+Pithoragarh
+Almora
+
+# --- tier-2/3 cities: Rajasthan ---
+Sikar
+Jhunjhunu
+Bhilwara
+Banswara
+Sawai Madhopur
+Nagaur
+Barmer
+Pali, Rajasthan
+
+# --- tier-2/3 cities: Punjab / Haryana ---
+Patiala
+Bathinda
+Hoshiarpur
+Kapurthala
+Rohtak
+Panipat
+Karnal
+Bhiwani
+Sirsa
+
+# --- tier-2/3 cities: Himachal / J&K ---
+Mandi, Himachal Pradesh
+Una, Himachal Pradesh
+Baramulla
+Anantnag
+
+# --- tier-2/3 cities: Gujarat ---
+Junagadh
+Morbi
+Bharuch
+Navsari
+Porbandar
+Patan, Gujarat
+Veraval
+
+# --- tier-2/3 cities: Madhya Pradesh ---
+Rewa
+Satna
+Burhanpur
+Chhindwara
+Vidisha
+Mandsaur
+Khandwa
+
+# --- tier-2/3 cities: Maharashtra ---
+Ahmednagar
+Latur
+Jalgaon
+Chandrapur
+Nanded
+Satara
+Sangli
+
+# --- tier-2/3 cities: Chhattisgarh ---
+Bhilai
+Jagdalpur
+Rajnandgaon
+Ambikapur
+
+# --- tier-2/3 cities: Bihar / Jharkhand ---
+Bhagalpur
+Darbhanga
+Muzaffarpur
+Gaya, India
+Deoghar
+Hazaribagh
+Bokaro Steel City
+
+# --- tier-2/3 cities: West Bengal / North-East ---
+Siliguri
+Durgapur
+Kharagpur
+Cooch Behar
+Agartala
+Imphal
+Tezpur
+Jorhat
+
+# --- tier-2/3 cities: Odisha ---
+Rourkela
+Sambalpur
+Berhampur
+Baripada
+Jeypore
+
+# --- tier-2/3 cities: Telangana / Andhra Pradesh ---
+Warangal
+Karimnagar
+Nizamabad
+Rajahmundry
+Kakinada
+Anantapur
+Kadapa
+
+# --- tier-2/3 cities: Karnataka ---
+Davanagere
+Ballari
+Shivamogga
+Hassan, Karnataka
+Udupi
+Bidar
+Raichur
+
+# --- tier-2/3 cities: Tamil Nadu ---
+Erode
+Vellore
+Thoothukudi
+Thanjavur
+Kumbakonam
+Dindigul
+Nagercoil
+
+# --- tier-2/3 cities: Kerala ---
+Kollam
+Palakkad
+Kannur
+Kottayam
+Malappuram
+Kasaragod
+
+# --- SPORTS: traditional & folk sports / games ---
+Yubi lakpi
+Kang (sport)
+Thoda
+Oil wrestling
+Dahi Handi
+Pithu (game)
+Marbles (game)
+Hopscotch
+Kite fighting
+Tug of war
+
+# --- SPORTS: indigenous martial arts ---
+Musti yuddha
+Huyen langlon
+Paika akhada
+Kuttu Varisai
+Adimurai
+Varma kalai
+Kathi Samu
+
+# --- SPORTS: boat races & water sport events ---
+Aranmula Uthrattathi Boat Race
+Champakulam Moolam Boat Race
+President's Trophy (boat race)
+Indira Gandhi Boat Race
+
+# --- SPORTS: festivals / venues that anchor sport to a place ---
+Kila Raipur Sports Festival
+Eden Gardens
+M. A. Chidambaram Stadium
+M. Chinnaswamy Stadium
+Sawai Mansingh Stadium
+Dhyan Chand National Stadium
+Major Dhyan Chand

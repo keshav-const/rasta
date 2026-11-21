@@ -1,0 +1,12 @@
+# Round-6 "frontier4" podcast batch — proven India travel/heritage feeds; fresh episodes
+# get picked up (run.py dedups already-processed episodes). Local faster-whisper, no API cost.
+# Run:  PODCAST_LIMIT=2 bash scripts/run_batch.sh podcast scripts/batches/frontier4_podcasts.txt
+
+# The Musafir Stories — India travel, place-by-place.
+https://www.omnycontent.com/d/playlist/e0dce4b3-2eb8-48cb-822c-af1d00e03e20/64cf3a81-17df-40ec-990a-af4e00a92e51/f5b69943-5379-4176-a258-af4e00a92e72/podcast.rss
+
+# Heritage India Podcast — monuments, history, heritage sites.
+https://feeds.megaphone.fm/ISP9127950437
+
+# Incredible India Travel.
+https://feeds.transistor.fm/incredible-india-travel

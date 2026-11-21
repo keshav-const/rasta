@@ -1,0 +1,25 @@
+# Round-6 "frontier4" video batch — YouTube, curated via yt-dlp ytsearch 2026-11-21.
+# Traditional/folk sports + tier-2/3 city & temple-town travel. run.py dedups.
+# Run:  bash scripts/run_batch.sh video scripts/batches/frontier4_videos.txt
+https://youtu.be/AqJuyzcZsN8
+https://youtu.be/WwuF1HkRnQg
+https://youtu.be/lRXzbPzGwZA
+https://youtu.be/7M7Z5wYghpc
+https://youtu.be/b4L7v5LRAWU
+https://youtu.be/VZJmzioxtYs
+https://youtu.be/RJP03ergWhk
+https://youtu.be/krXBO-FeBgQ
+https://youtu.be/4QVJT-LsZbw
+https://youtu.be/cxcMKPCBjRA
+https://youtu.be/fUsv2NyHprA
+https://youtu.be/NDUzvB2TbUw
+https://youtu.be/9Srg-KVRyWo
+https://youtu.be/hwLBuC0wpWY
+https://youtu.be/Ef0bKqxV63o
+https://youtu.be/8ty4APv0NIM
+https://youtu.be/a3OVBOOGLWo
+https://youtu.be/UOai7XEE8e4
+https://youtu.be/fc-KwYazNhs
+https://youtu.be/vu9cJfUy5Kk
+https://youtu.be/lQUQU3pWvvs
+https://youtu.be/tvWm-aw-PZM

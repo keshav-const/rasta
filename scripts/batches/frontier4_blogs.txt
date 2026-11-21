@@ -1,0 +1,16 @@
+# Round-6 "frontier4" blog batch — tier-2/3 cities & hill/temple towns. All curl-verified
+# 200 on 2026-11-21 (holidify). Dedup by source URL.
+# Run:  bash scripts/run_batch.sh blog scripts/batches/frontier4_blogs.txt
+
+https://www.holidify.com/places/yercaud/
+https://www.holidify.com/places/coonoor/
+https://www.holidify.com/places/udupi/
+https://www.holidify.com/places/warangal/
+https://www.holidify.com/places/kollam/
+https://www.holidify.com/places/kannur/
+https://www.holidify.com/places/palakkad/
+https://www.holidify.com/places/bhagalpur/
+https://www.holidify.com/places/sikar/
+https://www.holidify.com/places/junagadh/
+https://www.holidify.com/places/porbandar/
+https://www.holidify.com/places/siliguri/
